@@ -1,6 +1,5 @@
 {
   "name": "vurl",
-  "private": true,
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
@@ -8,9 +7,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "axios": "^0.26.0",
+    "firebase": "^9.6.6",
+    "js-cookie": "^3.0.1",
+    "naive-ui": "^2.25.2",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.1",
     "@vitejs/plugin-vue": "^2.2.0",
     "autoprefixer": "^10.4.2",
     "postcss": "^8.4.6",
@@ -18,5 +23,8 @@
     "typescript": "^4.5.4",
     "vite": "^2.8.0",
     "vue-tsc": "^0.29.8"
+  },
+  "engines": {
+    "node": "v16.13.2"
   }
 }
