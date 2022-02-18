@@ -11,9 +11,9 @@ export interface BookmarkDoc {
 	order: number
 }
 
-export const getBookmarks = async (groupId: string): Promise<any[]> => {
+export const getLinks = async (groupId: string): Promise<any[]> => {
 	try {
-		const url = `api/bookmark/bookmarks/?group=${groupId}`
+		const url = `api/vurl/links/?group=${groupId}`
 		const res = await httpClient.get<{ data: BookmarkDoc[] }>(url)
 		return res.data.data || []
 	} catch (error) {
@@ -24,7 +24,7 @@ export const getBookmarks = async (groupId: string): Promise<any[]> => {
 export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {
-		bookmarks.value = await getBookmarks(groupId)
+		bookmarks.value = await getLinks(groupId)
 	}
 	return reactive({
 		data: bookmarks,

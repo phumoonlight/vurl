@@ -12,7 +12,7 @@ export interface BookmarkGroupDoc {
 
 export const getBookmarkGroups = async (): Promise<BookmarkGroupDoc[]> => {
 	try {
-		const url = `api/bookmark/groups/`
+		const url = `api/vurl/groups/`
 		const res = await httpClient.get<{ data: BookmarkGroupDoc[] }>(url)
 		return res.data.data || []
 	} catch (error) {

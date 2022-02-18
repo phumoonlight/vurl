@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { NButton, NPopover, NModal } from 'naive-ui'
+import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from './services/firebase'
-import { useBookmarks } from './services/bookmark'
-import { useBookmarkGroups } from './services/bookmarkgroup'
+import { useBookmarks } from './services/links'
+import { useBookmarkGroups } from './services/linkgroups'
 import { cookie } from './common/cookie'
 import { useModal } from './hooks/modal'
 import ButtonSignInGoogle from './components/button/ButtonSignInGoogle.vue'

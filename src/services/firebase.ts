@@ -10,13 +10,13 @@ import {
 import { ref } from 'vue'
 
 const firebaseConfig = {
-	apiKey: 'AIzaSyDqCLpaTOaUbfI7RoCTI3l1vLN1gwPTYec',
-	authDomain: 'bookmark-85472.firebaseapp.com',
-	projectId: 'bookmark-85472',
-	storageBucket: 'bookmark-85472.appspot.com',
-	messagingSenderId: '474262333093',
-	appId: '1:474262333093:web:0d2ba836bbd8553fd14f4c',
-	measurementId: 'G-VHT2HLTFB2',
+	apiKey: 'AIzaSyCUfYJ_R_mrhRa2BZczAtH0SCQyG_Y7Gzk',
+	authDomain: 'vurl-24886.firebaseapp.com',
+	projectId: 'vurl-24886',
+	storageBucket: 'vurl-24886.appspot.com',
+	messagingSenderId: '113090692397',
+	appId: '1:113090692397:web:11fb795334b42488693fa4',
+	measurementId: 'G-370C05WNV1',
 }
 
 initializeApp(firebaseConfig)
@@ -37,10 +37,6 @@ export const signInWithGoogle = async () => {
 	const googleAuthProvider = new GoogleAuthProvider()
 	const result = await signInWithPopup(firebaseAuth, googleAuthProvider)
 	console.log(result)
-}
-
-export const signOut = () => {
-	firebaseAuth.signOut()
 }
 
 export const useFirebaseSignedInUser = () => {
