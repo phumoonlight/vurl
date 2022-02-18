@@ -21,6 +21,16 @@ export const getLinks = async (groupId: string): Promise<any[]> => {
 	}
 }
 
+export const createLink = async (payload: any) => {
+	try {
+		const url = `api/vurl/links/`
+		const res = await httpClient.post(url, payload)
+		return res.data
+	} catch (error) {
+		return null
+	}
+}
+
 export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {

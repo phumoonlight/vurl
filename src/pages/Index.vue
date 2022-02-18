@@ -8,13 +8,13 @@ import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
 import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
-import ModalAddBookmark from '../components/modal/ModalAddBookmark.vue'
+import ModalAddLink from '../components/modal/ModalAddLink.vue'
 import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
 
 const signedInUser = useFirebaseSignedInUser()
 const bookmarks = useBookmarks()
 const bookmarkGroups = useBookmarkGroups()
-const modalAddBookmark = useModal()
+const modalAddLink = useModal()
 const modalAddGroup = useModal()
 const isLoading = ref(true)
 
@@ -27,14 +27,13 @@ const onClickSignOut = () => {
 }
 
 const onClickAdd = (key: string) => {
-	if (key === 'bookmark') {
-		modalAddBookmark.show()
-		return
-	}
-	if (key === 'group') {
-		modalAddGroup.show()
-		return
-	}
+	if (key === 'link') modalAddLink.show()
+	if (key === 'group') modalAddGroup.show()
+}
+
+const onSubmitAddLink = () => {
+  modalAddLink.hide()
+	bookmarks.fetchData('')
 }
 
 watch(signedInUser.user, async (changedUser) => {
@@ -49,7 +48,7 @@ watch(signedInUser.user, async (changedUser) => {
 
 <template>
 	<div class="h-full">
-		<nav v-if="signedInUser.user.value">
+		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
 				<div class="text-xl tracking-wider uppercase font-serif font-bold">
 					vurl
@@ -60,12 +59,11 @@ watch(signedInUser.user, async (changedUser) => {
 				<div class="flex items-center gap-8">
 					<NPopover class="p-0" trigger="click">
 						<template #trigger>
-							<img
-								v-if="signedInUser.user.value.photoURL"
-								class="h-12 w-12 rounded-full cursor-pointer hover:brightness-75"
-								:src="signedInUser.user.value.photoURL"
-								alt="avatar"
-							/>
+							<div
+								class="bg-gray-500 p-2 rounded-full w-12 h-12 flex justify-center items-center cursor-pointer hover:brightness-75 text-2xl"
+							>
+								{{ signedInUser.user.value.displayName?.[0] }}
+							</div>
 						</template>
 						<div>
 							<div class="p-2 mb-4 opacity-75">
@@ -125,9 +123,9 @@ watch(signedInUser.user, async (changedUser) => {
 				v-if="!bookmarks.data.length && !isLoading"
 				class="flex justify-center h-full items-center"
 			>
-				There aren't any bookmarks yet
+				There aren't any links yet
 			</div>
-			<div class="flex gap-3">
+			<div class="flex flex-wrap gap-3">
 				<a
 					v-for="item in bookmarks.data"
 					:key="item.id"
@@ -140,31 +138,11 @@ watch(signedInUser.user, async (changedUser) => {
 					<div class="p-2">{{ item.title }}</div>
 				</a>
 			</div>
-
-			<!-- <div class="flex justify-center gap-2">
-				<NTag>Bookmark</NTag>
-				<NTag>Twitter</NTag>
-			</div>
-			<div class="flex flex-col justify-center items-center min-h-[250px]">
-				<div class="mb-2">You don't have any bookmarks</div>
-				<div><NButton>Add bookmark</NButton></div>
-			</div> -->
 		</div>
-		<ModalAddBookmark :modal="modalAddBookmark" />
+		<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
 		<ModalAddGroup :modal="modalAddGroup" />
 	</div>
 	<router-view></router-view>
 </template>
 
-<style>
-html,
-body,
-#app {
-	height: 100%;
-}
-
-#app {
-	background: #0f1014;
-	color: #ffffff;
-}
-</style>
+<style></style>
