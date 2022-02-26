@@ -30,3 +30,13 @@ export const useBookmarkGroups = () => {
 		fetchData,
 	})
 }
+
+export const createGroup = async (payload: any) => {
+	try {
+		const url = `api/vurl/groups/`
+		const res = await httpClient.post(url, payload)
+		return res.data
+	} catch (error) {
+		return null
+	}
+}

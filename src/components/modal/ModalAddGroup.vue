@@ -1,20 +1,41 @@
 <script setup lang="ts">
-import { defineEmits } from 'vue'
-import { NModal } from 'naive-ui'
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { NModal, NInput, NButton } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
+import { createLink } from '../../services/links'
+import { createGroup } from '../../services/linkgroups'
 
 interface Props {
 	modal: ModalController
 }
 
-defineProps<Props>()
-const emit = defineEmits(['select'])
+const emit = defineEmits(['submit'])
+const props = defineProps<Props>()
+const route = useRoute()
+const inputTitle = ref('')
+const inputUrl = ref('')
+const inputImageUrl = ref('')
+
+const onSubmit = async () => {
+	await createGroup({
+		timg: inputImageUrl.value,
+		title: inputTitle.value,
+		desc: inputUrl.value,
+	})
+	props.modal.hide()
+	emit('submit')
+}
 </script>
 
 <template>
 	<NModal class="text-white" v-model:show="modal.isVisible">
 		<div>
 			<div>Add group</div>
+			<NInput placeholder="title" v-model:value="inputTitle" />
+			<NInput placeholder="description" v-model:value="inputUrl" />
+			<NInput placeholder="image" v-model:value="inputImageUrl" />
+			<NButton @click="onSubmit">Save</NButton>
 		</div>
 	</NModal>
 </template>

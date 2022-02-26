@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '../services/firebase'
 import { useBookmarks } from '../services/links'
@@ -11,15 +12,20 @@ import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
 import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
 
+const route = useRoute()
 const signedInUser = useFirebaseSignedInUser()
 const bookmarks = useBookmarks()
-const bookmarkGroups = useBookmarkGroups()
+const group = useBookmarkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
 const isLoading = ref(true)
 
 const isUserNotSignedIn = computed(() => {
 	return !signedInUser.user.value && !signedInUser.isLoading.value
+})
+
+const groupId = computed(() => {
+	return (route.query.group as string) || ''
 })
 
 const onClickSignOut = () => {
@@ -32,16 +38,25 @@ const onClickAdd = (key: string) => {
 }
 
 const onSubmitAddLink = () => {
-  modalAddLink.hide()
-	bookmarks.fetchData('')
+	modalAddLink.hide()
+	bookmarks.fetchData(groupId.value)
 }
+
+const onSubmitAddGroup = () => {
+	modalAddGroup.hide()
+	group.fetchData()
+}
+
+watch(route, () => {
+	bookmarks.fetchData(groupId.value)
+})
 
 watch(signedInUser.user, async (changedUser) => {
 	if (!changedUser) return
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
-	await bookmarks.fetchData('')
-	await bookmarkGroups.fetchData()
+	await bookmarks.fetchData(groupId.value)
+	await group.fetchData()
 	isLoading.value = false
 })
 </script>
@@ -110,7 +125,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</router-link>
 				<router-link
 					:to="`/?group=${item.id}`"
-					v-for="item in bookmarkGroups.data"
+					v-for="item in group.data"
 					class="flex items-end bg-gray-700 min-w-[200px] p-2 h-[90px] bg-cover text-white"
 					:style="{
 						backgroundImage: `url(${item.timg})`,
@@ -140,7 +155,7 @@ watch(signedInUser.user, async (changedUser) => {
 			</div>
 		</div>
 		<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
-		<ModalAddGroup :modal="modalAddGroup" />
+		<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
 	</div>
 	<router-view></router-view>
 </template>
