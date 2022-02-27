@@ -14,7 +14,7 @@ import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
 
 const route = useRoute()
 const signedInUser = useFirebaseSignedInUser()
-const bookmarks = useBookmarks()
+const links = useBookmarks()
 const group = useBookmarkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
@@ -39,7 +39,7 @@ const onClickAdd = (key: string) => {
 
 const onSubmitAddLink = () => {
 	modalAddLink.hide()
-	bookmarks.fetchData(groupId.value)
+	links.fetchData(groupId.value)
 }
 
 const onSubmitAddGroup = () => {
@@ -48,14 +48,14 @@ const onSubmitAddGroup = () => {
 }
 
 watch(route, () => {
-	bookmarks.fetchData(groupId.value)
+	links.fetchData(groupId.value)
 })
 
 watch(signedInUser.user, async (changedUser) => {
 	if (!changedUser) return
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
-	await bookmarks.fetchData(groupId.value)
+	await links.fetchData(groupId.value)
 	await group.fetchData()
 	isLoading.value = false
 })
@@ -118,15 +118,20 @@ watch(signedInUser.user, async (changedUser) => {
 				</a>
 			</div>
 		</div>
-		<div v-if="signedInUser.user.value" class="flex mt-5 gap-3">
+		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4">
 			<div class="flex flex-col">
-				<router-link to="/" class="min-w-[200px] p-2 mb-2 bg-gray-700">
+				<router-link
+					to="/"
+					class="group-item min-w-[200px] p-2 mb-4 bg-gray-700"
+					:class="{ 'group-item-active': !groupId }"
+				>
 					<strong class="font-serif tracking-wide">Main</strong>
 				</router-link>
 				<router-link
 					:to="`/?group=${item.id}`"
 					v-for="item in group.data"
-					class="flex items-end bg-gray-700 min-w-[200px] p-2 h-[90px] bg-cover text-white"
+					class="group-item flex items-end bg-gray-700 min-w-[200px] p-2 h-[90px] bg-cover text-white mb-2"
+					:class="{ 'group-item-active': item.id === groupId }"
 					:style="{
 						backgroundImage: `url(${item.timg})`,
 					}"
@@ -135,22 +140,21 @@ watch(signedInUser.user, async (changedUser) => {
 				</router-link>
 			</div>
 			<div
-				v-if="!bookmarks.data.length && !isLoading"
+				v-if="!links.data.length && !isLoading"
 				class="flex justify-center h-full items-center"
 			>
 				There aren't any links yet
 			</div>
-			<div class="flex flex-wrap gap-3">
+			<div class="grid grid-cols-4 gap-4 items-start">
 				<a
-					v-for="item in bookmarks.data"
+					v-for="item in links.data"
 					:key="item.id"
 					:href="item.url"
-					class="border"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<img class="h-[150px]" :src="item.timg" alt="" />
-					<div class="p-2">{{ item.title }}</div>
+					<img class="h-[200px] w-[300px] object-cover object-top" :src="item.timg" alt="" />
+					<div class="p-2 pl-0 font-bold tracking-wide">{{ item.title }}</div>
 				</a>
 			</div>
 		</div>
@@ -160,4 +164,17 @@ watch(signedInUser.user, async (changedUser) => {
 	<router-view></router-view>
 </template>
 
-<style></style>
+<style scoped>
+
+.group-item {
+	opacity: 0.75;
+}
+
+.group-item:hover {
+	opacity: 0.9;
+}
+
+.group-item.group-item-active {
+	opacity: 1;
+}
+</style>
