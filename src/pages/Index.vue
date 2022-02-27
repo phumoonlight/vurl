@@ -7,6 +7,7 @@ import { useBookmarks } from '../services/links'
 import { useBookmarkGroups } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
+import imageNoImage from '../assets/no-image.png'
 import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
@@ -153,8 +154,12 @@ watch(signedInUser.user, async (changedUser) => {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<img class="h-[200px] w-[300px] object-cover object-top" :src="item.timg" alt="" />
-					<div class="p-2 pl-0 font-bold tracking-wide">{{ item.title }}</div>
+					<img
+						class="h-[200px] w-[300px] object-cover object-top"
+						:src="item.timg || imageNoImage"
+						alt=""
+					/>
+					<div class="p-2 pl-0 font-bold tracking-wider text-xl">{{ item.title }}</div>
 				</a>
 			</div>
 		</div>
@@ -165,7 +170,6 @@ watch(signedInUser.user, async (changedUser) => {
 </template>
 
 <style scoped>
-
 .group-item {
 	opacity: 0.75;
 }
