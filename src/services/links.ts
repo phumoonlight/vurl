@@ -35,6 +35,7 @@ export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {
 		bookmarks.value = await getLinks(groupId)
+		bookmarks.value.sort((a, b) => a.order - b.order)
 	}
 	return reactive({
 		data: bookmarks,

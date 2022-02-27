@@ -24,6 +24,7 @@ export const useBookmarkGroups = () => {
 	const groups = ref<BookmarkGroupDoc[]>([])
 	const fetchData = async () => {
 		groups.value = await getBookmarkGroups()
+		groups.value.sort((a, b) => a.order - b.order)
 	}
 	return reactive({
 		data: groups,
