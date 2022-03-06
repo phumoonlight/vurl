@@ -3,14 +3,11 @@
 </template>
 
 <style>
-html,
-body,
-#app {
-	height: 100%;
+html {
+	background: #0f1014;
 }
 
 #app {
-	background: #0f1014;
 	color: #ffffff;
 }
 </style>

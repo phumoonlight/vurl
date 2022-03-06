@@ -63,7 +63,7 @@ watch(signedInUser.user, async (changedUser) => {
 </script>
 
 <template>
-	<div class="h-full">
+	<div class="pb-[100px]">
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
 				<div class="text-xl tracking-wider uppercase font-serif font-bold">
