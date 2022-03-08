@@ -41,6 +41,16 @@ export const updateLink = async (id: string, payload: any) => {
 	}
 }
 
+export const deleteLink = async (id: string) => {
+	try {
+		const url = `api/vurl/links/${id}`
+		const res = await httpClient.delete(url)
+		return res.data
+	} catch (error) {
+		return null
+	}
+}
+
 export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {

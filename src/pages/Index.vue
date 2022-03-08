@@ -83,9 +83,13 @@ watch(signedInUser.user, async (changedUser) => {
 
 <template>
 	<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
-	<ModalEditLink :modal="modalEditLink" :dataSource="editingLink" @submit="onSubmitEditLink" />
+	<ModalEditLink
+		:modal="modalEditLink"
+		:dataSource="editingLink"
+		@submit="onSubmitEditLink"
+	/>
 	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
-	<div class="pb-[100px]">
+	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
 				<div class="text-xl tracking-wider uppercase font-serif font-bold">
@@ -118,10 +122,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</div>
 			</div>
 		</nav>
-		<div
-			v-if="isUserNotSignedIn"
-			class="flex justify-center items-center h-full"
-		>
+		<div v-if="isUserNotSignedIn" class="flex justify-center items-center">
 			<div class="flex flex-col items-center w-[300px]">
 				<div
 					class="text-6xl font-serif font-bold mb-4 tracking-widest uppercase"
@@ -141,7 +142,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</a>
 			</div>
 		</div>
-		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4">
+		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start pb-20">
 			<div class="flex flex-col">
 				<router-link
 					to="/"

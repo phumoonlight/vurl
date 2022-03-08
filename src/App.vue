@@ -3,6 +3,12 @@
 </template>
 
 <style>
+html,
+body,
+#app {
+	height: 100%;
+}
+
 html {
 	background: #0f1014;
 }

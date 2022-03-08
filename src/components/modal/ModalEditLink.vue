@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref, watch, watchEffect } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import validator from 'validator'
-import { NModal, NInput, NButton, c } from 'naive-ui'
+import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
-import { BookmarkDoc, updateLink } from '../../services/links'
+import { BookmarkDoc, updateLink, deleteLink } from '../../services/links'
 import { uploadImage } from '../../services/image'
+import { wait } from '../../common/utils'
 import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
@@ -21,6 +22,7 @@ const inputUrl = ref('')
 const inputImageUrl = ref('')
 const inputImageFile = ref<File | null>(null)
 const previewImageUrl = ref('')
+const buttonDeleteText = ref('Delete')
 
 const onSubmit = async () => {
 	if (!props.dataSource) return
@@ -36,6 +38,17 @@ const onSubmit = async () => {
 		url: inputUrl.value,
 		timg: thumbnail,
 	})
+	props.modal.hide()
+	emit('submit')
+}
+
+const onClickDelete = async () => {
+	if (buttonDeleteText.value.toLowerCase() !== 'delete') return
+	if (!props.dataSource) return
+	buttonDeleteText.value = 'Deleting...'
+	await deleteLink(props.dataSource.id)
+	await wait(500)
+	buttonDeleteText.value = 'Delete'
 	props.modal.hide()
 	emit('submit')
 }
@@ -128,14 +141,21 @@ watchEffect(() => {
 					</div>
 				</div>
 			</div>
-
-			<div class="flex justify-end gap-4 mt-6">
-				<NButton quaternary class="text-white" @click="modal.hide">
-					Cancel
-				</NButton>
-				<NButton class="w-[120px] font-bold" type="primary" @click="onSubmit">
-					Save
-				</NButton>
+			<div class="flex justify-between items-center gap-4 mt-12">
+				<div>
+					<button class="text-red-500 p-1" @click="onClickDelete">
+						{{ buttonDeleteText }}
+					</button>
+				</div>
+				<div>
+					<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
+					<button
+						class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
+						@click="onSubmit"
+					>
+						Save
+					</button>
+				</div>
 			</div>
 		</div>
 	</NModal>
