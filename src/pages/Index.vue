@@ -122,7 +122,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</div>
 			</div>
 		</nav>
-		<div v-if="isUserNotSignedIn" class="flex justify-center items-center">
+		<div v-if="isUserNotSignedIn" class="flex justify-center items-center h-[100vh]">
 			<div class="flex flex-col items-center w-[300px]">
 				<div
 					class="text-6xl font-serif font-bold mb-4 tracking-widest uppercase"
