@@ -31,6 +31,16 @@ export const createLink = async (payload: any) => {
 	}
 }
 
+export const updateLink = async (id: string, payload: any) => {
+	try {
+		const url = `api/vurl/links/${id}`
+		const res = await httpClient.patch(url, payload)
+		return res.data
+	} catch (error) {
+		return null
+	}
+}
+
 export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {

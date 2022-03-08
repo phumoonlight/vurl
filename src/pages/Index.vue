@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '../services/firebase'
-import { useBookmarks } from '../services/links'
+import { useBookmarks, BookmarkDoc } from '../services/links'
 import { useBookmarkGroups } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
@@ -12,6 +12,8 @@ import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
 import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
+import IconEdit from '../components/icons/IconEdit.vue'
+import ModalEditLink from '../components/modal/ModalEditLink.vue'
 
 const route = useRoute()
 const signedInUser = useFirebaseSignedInUser()
@@ -19,6 +21,8 @@ const links = useBookmarks()
 const group = useBookmarkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
+const modalEditLink = useModal()
+const editingLink = ref<BookmarkDoc | null>(null)
 const isLoading = ref(true)
 
 const isUserNotSignedIn = computed(() => {
@@ -28,6 +32,11 @@ const isUserNotSignedIn = computed(() => {
 const groupId = computed(() => {
 	return (route.query.group as string) || ''
 })
+
+const formatUrl = (url: string) => {
+	const formattedUrl = url.replace(/^https?:\/\//, '').replace(/www./, '')
+	return formattedUrl
+}
 
 const onClickSignOut = () => {
 	signedInUser.signOut()
@@ -43,9 +52,19 @@ const onSubmitAddLink = () => {
 	links.fetchData(groupId.value)
 }
 
+const onSubmitEditLink = async () => {
+	modalEditLink.hide()
+	links.fetchData(groupId.value)
+}
+
 const onSubmitAddGroup = () => {
 	modalAddGroup.hide()
 	group.fetchData()
+}
+
+const onClickEdit = (item: BookmarkDoc) => {
+	editingLink.value = item
+	modalEditLink.show()
 }
 
 watch(route, () => {
@@ -63,6 +82,9 @@ watch(signedInUser.user, async (changedUser) => {
 </script>
 
 <template>
+	<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
+	<ModalEditLink :modal="modalEditLink" :dataSource="editingLink" @submit="onSubmitEditLink" />
+	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
 	<div class="pb-[100px]">
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
@@ -147,29 +169,58 @@ watch(signedInUser.user, async (changedUser) => {
 				There aren't any links yet
 			</div>
 			<div class="grid grid-cols-4 gap-4 items-start">
-				<a
+				<div
 					v-for="item in links.data"
 					:key="item.id"
-					:href="item.url"
-					target="_blank"
-					rel="noopener noreferrer"
+					class="link-item relative"
 				>
-					<img
-						class="h-[200px] w-[300px] object-cover object-top"
-						:src="item.timg || imageNoImage"
-						alt=""
-					/>
-					<div class="p-2 pl-0 font-bold tracking-wider text-xl">{{ item.title }}</div>
-				</a>
+					<a :href="item.url" target="_blank" rel="noopener noreferrer">
+						<div>
+							<img
+								class="h-[200px] w-[300px] object-cover object-top"
+								:src="item.timg || imageNoImage"
+								alt=""
+							/>
+						</div>
+						<div class="p-2 pl-0 font-bold tracking-wider text-xl">
+							{{ item.title }}
+						</div>
+					</a>
+					<div
+						class="link-item-url absolute bottom-[50px] left-2 w-[200px] truncate"
+					>
+						{{ formatUrl(item.url) }}
+					</div>
+					<div
+						class="btn-edit absolute bottom-[50px] right-2 p-2 bg-white rounded-full"
+						@click="onClickEdit(item)"
+					>
+						<IconEdit class="text-black w-[20px] h-[20px]" />
+					</div>
+				</div>
 			</div>
 		</div>
-		<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
-		<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
 	</div>
-	<router-view></router-view>
 </template>
 
 <style scoped>
+.link-item-url {
+	display: none;
+}
+.btn-edit {
+	cursor: pointer;
+	display: none;
+}
+
+.link-item:hover .btn-edit,
+.link-item:hover .link-item-url {
+	display: block;
+}
+
+.link-item:hover img {
+	filter: brightness(0.5);
+}
+
 .group-item {
 	opacity: 0.75;
 }
