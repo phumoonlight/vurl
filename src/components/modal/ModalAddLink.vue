@@ -6,6 +6,7 @@ import { NModal, NInput, NButton, c } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
 import { createLink } from '../../services/links'
 import { uploadImage } from '../../services/image'
+import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
 	modal: ModalController
@@ -80,22 +81,17 @@ watch(props.modal, async () => {
 
 <template>
 	<NModal
-		class="modal text-white p-10 w-[640px]"
+		class="modal text-white p-10 w-[500px]"
 		v-model:show="modal.isVisible"
 	>
 		<div>
 			<div class="font-bold text-3xl mb-8 tracking-wide">Add link</div>
-
-			<div class="flex">
+			<div class="flex flex-col gap-8">
 				<div class="flex justify-center mr-4">
-					<div
-						v-if="!previewImageUrl"
-						class="w-[200px] h-[300px] bg-gray-500 rounded-[20px] opacity-70"
-					></div>
-					<div v-if="previewImageUrl" class="w-[200px]">
+					<div class="w-[300px] h-[200px]">
 						<img
-							class="h-[300px] object-cover rounded-[20px]"
-							:src="previewImageUrl"
+							class="h-[200px] w-full object-cover object-top rounded-[20px]"
+							:src="previewImageUrl || imageNoImage"
 							alt=""
 						/>
 					</div>
@@ -127,14 +123,14 @@ watch(props.modal, async () => {
 					</div>
 				</div>
 			</div>
-
-			<div class="flex justify-end gap-4 mt-6">
-				<NButton quaternary class="text-white" @click="modal.hide">
-					Cancel
-				</NButton>
-				<NButton class="w-[120px] font-bold" type="primary" @click="onSubmit">
+			<div class="flex justify-end items-center mt-12">
+				<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
+				<button
+					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
+					@click="onSubmit"
+				>
 					Save
-				</NButton>
+				</button>
 			</div>
 		</div>
 	</NModal>
