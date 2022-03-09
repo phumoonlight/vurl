@@ -16,6 +16,7 @@ import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
 import IconEdit from '../components/icons/IconEdit.vue'
 import ModalEditLink from '../components/modal/ModalEditLink.vue'
 import LinkList from '../components/LinkList.vue'
+import GroupList from '../components/GroupList.vue'
 
 const route = useRoute()
 const signedInUser = useFirebaseSignedInUser()
@@ -153,28 +154,9 @@ watch(signedInUser.user, async (changedUser) => {
 		</div>
 		<div
 			v-if="signedInUser.user.value"
-			class="flex mt-4 gap-4 items-start pb-20"
+			class="flex mt-4 gap-4 items-start"
 		>
-			<div class="flex flex-col">
-				<router-link
-					to="/"
-					class="group-item min-w-[200px] p-2 mb-4 bg-gray-700"
-					:class="{ 'group-item-active': !groupId }"
-				>
-					<strong class="font-serif tracking-wide">Main</strong>
-				</router-link>
-				<router-link
-					:to="`/?group=${item.id}`"
-					v-for="item in group.data"
-					class="group-item flex items-end bg-gray-700 min-w-[200px] p-2 h-[90px] bg-cover text-white mb-2"
-					:class="{ 'group-item-active': item.id === groupId }"
-					:style="{
-						backgroundImage: `url(${item.timg})`,
-					}"
-				>
-					<div class="drop-shadow-lg bg-black p-1">{{ item.title }}</div>
-				</router-link>
-			</div>
+			<GroupList :data-source="group.data" :active-group-id="groupId" />
 			<div
 				v-if="!links.data.length && !isLoading"
 				class="flex justify-center h-full items-center"
@@ -190,17 +172,3 @@ watch(signedInUser.user, async (changedUser) => {
 		</div>
 	</div>
 </template>
-
-<style scoped>
-.group-item {
-	opacity: 0.75;
-}
-
-.group-item:hover {
-	opacity: 0.9;
-}
-
-.group-item.group-item-active {
-	opacity: 1;
-}
-</style>
