@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
+import Draggable from 'vuedraggable'
 import { useFirebaseSignedInUser } from '../services/firebase'
 import { useBookmarks, BookmarkDoc } from '../services/links'
 import { useBookmarkGroups } from '../services/linkgroups'
@@ -14,6 +15,7 @@ import ModalAddLink from '../components/modal/ModalAddLink.vue'
 import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
 import IconEdit from '../components/icons/IconEdit.vue'
 import ModalEditLink from '../components/modal/ModalEditLink.vue'
+import LinkList from '../components/LinkList.vue'
 
 const route = useRoute()
 const signedInUser = useFirebaseSignedInUser()
@@ -65,6 +67,10 @@ const onSubmitAddGroup = () => {
 const onClickEdit = (item: BookmarkDoc) => {
 	editingLink.value = item
 	modalEditLink.show()
+}
+
+const onReorderLink = async ({ itemId = '', newOrder = 0 }) => {
+	await links.updateOrder(itemId, newOrder)
 }
 
 watch(route, () => {
@@ -122,7 +128,10 @@ watch(signedInUser.user, async (changedUser) => {
 				</div>
 			</div>
 		</nav>
-		<div v-if="isUserNotSignedIn" class="flex justify-center items-center h-[100vh]">
+		<div
+			v-if="isUserNotSignedIn"
+			class="flex justify-center items-center h-[100vh]"
+		>
 			<div class="flex flex-col items-center w-[300px]">
 				<div
 					class="text-6xl font-serif font-bold mb-4 tracking-widest uppercase"
@@ -142,7 +151,10 @@ watch(signedInUser.user, async (changedUser) => {
 				</a>
 			</div>
 		</div>
-		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start pb-20">
+		<div
+			v-if="signedInUser.user.value"
+			class="flex mt-4 gap-4 items-start pb-20"
+		>
 			<div class="flex flex-col">
 				<router-link
 					to="/"
@@ -169,59 +181,17 @@ watch(signedInUser.user, async (changedUser) => {
 			>
 				There aren't any links yet
 			</div>
-			<div class="grid grid-cols-4 gap-4 items-start">
-				<div
-					v-for="item in links.data"
-					:key="item.id"
-					class="link-item relative"
-				>
-					<a :href="item.url" target="_blank" rel="noopener noreferrer">
-						<div>
-							<img
-								class="h-[200px] w-[300px] object-cover object-top"
-								:src="item.timg || imageNoImage"
-								alt=""
-							/>
-						</div>
-						<div class="p-2 pl-0 font-bold tracking-wider text-xl">
-							{{ item.title }}
-						</div>
-					</a>
-					<div
-						class="link-item-url absolute bottom-[50px] left-2 w-[200px] truncate"
-					>
-						{{ formatUrl(item.url) }}
-					</div>
-					<div
-						class="btn-edit absolute bottom-[50px] right-2 p-2 bg-white rounded-full"
-						@click="onClickEdit(item)"
-					>
-						<IconEdit class="text-black w-[20px] h-[20px]" />
-					</div>
-				</div>
-			</div>
+			<LinkList
+				v-if="links.data.length && !isLoading"
+				:data-source="links.data"
+				@edit="onClickEdit"
+				@reorder="onReorderLink"
+			/>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-.link-item-url {
-	display: none;
-}
-.btn-edit {
-	cursor: pointer;
-	display: none;
-}
-
-.link-item:hover .btn-edit,
-.link-item:hover .link-item-url {
-	display: block;
-}
-
-.link-item:hover img {
-	filter: brightness(0.5);
-}
-
 .group-item {
 	opacity: 0.75;
 }

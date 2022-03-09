@@ -51,14 +51,28 @@ export const deleteLink = async (id: string) => {
 	}
 }
 
+export const updateOrder = async (id: string, order: number) => {
+	try {
+		const url = `api/vurl/links/${id}`
+		const res = await httpClient.patch(url, {
+			order,
+		})
+		return res.data
+	} catch (error) {
+		return null
+	}
+}
+
 export const useBookmarks = () => {
 	const bookmarks = ref<BookmarkDoc[]>([])
 	const fetchData = async (groupId: string) => {
 		bookmarks.value = await getLinks(groupId)
-		bookmarks.value.sort((a, b) => a.order - b.order)
+		bookmarks.value.sort((a, b) => b.order - a.order)
 	}
+
 	return reactive({
 		data: bookmarks,
 		fetchData,
+		updateOrder,
 	})
 }
