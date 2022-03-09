@@ -60,9 +60,9 @@ const onChange = (event: any) => {
 		</router-link>
 		<Draggable
 			class="max-h-[75vh] overflow-scroll"
-			v-model="dataSource"
 			group="link-groups"
 			item-key="id"
+			:list="dataSource"
 			@change="onChange"
 		>
 			<template #item="item">

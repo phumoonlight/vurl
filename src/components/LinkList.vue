@@ -57,9 +57,9 @@ const onChange = (event: any) => {
 <template>
 	<Draggable
 		class="grid grid-cols-4 gap-4 items-start"
-		v-model="dataSource"
 		group="links"
 		item-key="id"
+		:list="dataSource"
 		@change="onChange"
 	>
 		<template #item="item">
