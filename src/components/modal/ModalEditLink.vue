@@ -137,7 +137,7 @@ watchEffect(() => {
 							v-model:value="inputImageUrl"
 						/>
 						<div>OR</div>
-						<input type="file" @change="onChangeInputImageFile" />
+						<input type="file" @change="onChangeInputImageFile" accept="image/*" />
 					</div>
 				</div>
 			</div>
