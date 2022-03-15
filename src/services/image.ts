@@ -1,11 +1,10 @@
 import { httpClient } from '../common/http'
 
-export const uploadImage = async (file: any) => {
+export const uploadImage = async (file: File) => {
 	try {
 		const payload = new FormData()
 		payload.set('file', file)
-		const url = `api/upload/`
-		const res = await httpClient.post(url, payload)
+		const res = await httpClient.post('api/vurl/images', payload)
 		return res.data
 	} catch (error) {
 		return null
