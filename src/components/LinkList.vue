@@ -24,7 +24,7 @@ const formatUrl = (url: string) => {
 	return formattedUrl
 }
 
-const getRandomOrderBetween = (min: number, max: number) => {
+const getNewOrderBetween = (min: number, max: number) => {
 	return Math.random() * (max - min) + min
 }
 
@@ -33,19 +33,20 @@ const onClickEdit = (item: BookmarkDoc) => {
 }
 
 const onChange = (event: any) => {
+	const FACTOR = 0.0000001
 	const typedEvent: DragChangeEvent = event
 	const targetItem = typedEvent.moved.element
 	const itemId = targetItem.id
 	const newIndex = typedEvent.moved.newIndex
-	const nextItem = props.dataSource[newIndex + 1]
-	const prevItem = props.dataSource[newIndex + -1]
+	const behindItem = props.dataSource[newIndex + 1]
+	const frontItem = props.dataSource[newIndex - 1]
 	let newOrder = 0
-	if (!prevItem && nextItem) {
-		newOrder = nextItem.order + 0.01
-	} else if (prevItem && nextItem) {
-		newOrder = getRandomOrderBetween(prevItem.order, nextItem.order)
-	} else if (prevItem && !nextItem) {
-		newOrder = prevItem.order - 0.01
+	if (!frontItem && behindItem) {
+		newOrder = behindItem.order + FACTOR
+	} else if (frontItem && behindItem) {
+		newOrder = getNewOrderBetween(behindItem.order, frontItem.order)
+	} else if (frontItem && !behindItem) {
+		newOrder = frontItem.order - FACTOR
 	}
 	emit('reorder', {
 		itemId,

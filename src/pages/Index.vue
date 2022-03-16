@@ -71,7 +71,7 @@ const onClickEdit = (item: BookmarkDoc) => {
 }
 
 const onReorderLink = async ({ itemId = '', newOrder = 0 }) => {
-	await links.updateOrder(itemId, newOrder)
+	links.updateOrder(itemId, newOrder)
 }
 
 watch(route, () => {
@@ -152,10 +152,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</a>
 			</div>
 		</div>
-		<div
-			v-if="signedInUser.user.value"
-			class="flex mt-4 gap-4 items-start"
-		>
+		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
 			<GroupList :data-source="group.data" :active-group-id="groupId" />
 			<div
 				v-if="!links.data.length && !isLoading"
