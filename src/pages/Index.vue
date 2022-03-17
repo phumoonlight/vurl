@@ -55,19 +55,13 @@ const onSubmitAddLink = () => {
 	links.fetchData(groupId.value)
 }
 
-const onSubmitEditLink = async () => {
-	modalEditLink.hide()
-	links.fetchData(groupId.value)
-}
-
 const onSubmitAddGroup = () => {
 	modalAddGroup.hide()
 	group.fetchData()
 }
 
-const onClickEdit = (item: BookmarkDoc) => {
-	editingLink.value = item
-	modalEditLink.show()
+const onSubmitEditLink = async () => {
+	links.fetchData(groupId.value)
 }
 
 const onReorderLink = async ({ itemId = '', newOrder = 0 }) => {
@@ -90,11 +84,6 @@ watch(signedInUser.user, async (changedUser) => {
 
 <template>
 	<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
-	<ModalEditLink
-		:modal="modalEditLink"
-		:dataSource="editingLink"
-		@submit="onSubmitEditLink"
-	/>
 	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
 	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
@@ -163,7 +152,7 @@ watch(signedInUser.user, async (changedUser) => {
 			<LinkList
 				v-if="links.data.length && !isLoading"
 				:data-source="links.data"
-				@edit="onClickEdit"
+				@editsubmit="onSubmitEditLink"
 				@reorder="onReorderLink"
 			/>
 		</div>

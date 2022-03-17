@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { BookmarkDoc } from '../services/links'
 import imageNoImage from '../assets/no-image.png'
 import IconEdit from '../components/icons/IconEdit.vue'
+import { useModal } from '../hooks/modal'
+import ModalEditLink from './modal/ModalEditLink.vue'
 
 interface Props {
 	dataSource: BookmarkDoc[]
@@ -16,8 +19,10 @@ interface DragChangeEvent {
 	}
 }
 
+const emit = defineEmits(['reorder', 'editsubmit'])
 const props = defineProps<Props>()
-const emit = defineEmits(['edit', 'reorder'])
+const modalEditLink = useModal()
+const editingLink = ref<BookmarkDoc | null>(null)
 
 const formatUrl = (url: string) => {
 	const formattedUrl = url.replace(/^https?:\/\//, '').replace(/www./, '')
@@ -29,7 +34,13 @@ const getNewOrderBetween = (min: number, max: number) => {
 }
 
 const onClickEdit = (item: BookmarkDoc) => {
-	emit('edit', item)
+	editingLink.value = item
+	modalEditLink.show()
+}
+
+const onSubmitEdit = async () => {
+	modalEditLink.hide()
+	emit('editsubmit')
 }
 
 const onChange = (event: any) => {
@@ -56,6 +67,11 @@ const onChange = (event: any) => {
 </script>
 
 <template>
+	<ModalEditLink
+		:modal="modalEditLink"
+		:dataSource="editingLink"
+		@submit="onSubmitEdit"
+	/>
 	<Draggable
 		class="grid grid-cols-4 gap-4 items-start"
 		group="links"
