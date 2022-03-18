@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
+import { watchEffect } from 'vue'
 import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
 import { useLoading } from '../../hooks/loading'
 import { useLinkForm } from '../../hooks/form'
-import { BookmarkDoc, updateLink, deleteLink } from '../../services/links'
-import { uploadImage } from '../../services/image'
-import { wait } from '../../common/utils'
+import { BookmarkDoc } from '../../services/links'
 import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
@@ -17,7 +14,6 @@ interface Props {
 
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
-const route = useRoute()
 const loading = useLoading()
 const linkForm = useLinkForm()
 
@@ -25,23 +21,9 @@ const onSubmit = async () => {
 	if (loading.isLoading) return
 	if (!props.dataSource) return
 	loading.start()
-	let thumbnail = linkForm.imageUrl
-	if (linkForm.imageFile) {
-		const res = await uploadImage(linkForm.imageFile)
-		if (!res) {
-			loading.done()
-			return
-		}
-		thumbnail = res.uploadedUrl
-	}
-	const resUpdateLink = await updateLink(props.dataSource.id, {
-		gid: route.query.group,
-		title: linkForm.name,
-		url: linkForm.url,
-		timg: thumbnail,
-	})
+	const isSuccess = await linkForm.update()
 	loading.done()
-	if (!resUpdateLink) return
+	if (!isSuccess) return
 	props.modal.hide()
 	emit('submit')
 }
@@ -50,9 +32,9 @@ const onClickDelete = async () => {
 	if (loading.isLoading) return
 	if (!props.dataSource) return
 	loading.start()
-	await deleteLink(props.dataSource.id)
-	await wait(500)
+	const isSuccess = linkForm.remove()
 	loading.done()
+	if (!isSuccess) return
 	props.modal.hide()
 	emit('submit')
 }
@@ -60,6 +42,7 @@ const onClickDelete = async () => {
 watchEffect(() => {
 	if (!props.dataSource) return
 	if (!props.modal.isVisible) return
+	linkForm.linkId = props.dataSource.id
 	linkForm.name = props.dataSource.title
 	linkForm.url = props.dataSource.url
 	linkForm.imageUrl = props.dataSource.timg
