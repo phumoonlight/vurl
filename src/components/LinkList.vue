@@ -89,20 +89,22 @@ const onChange = (event: any) => {
 							alt=""
 						/>
 					</div>
-					<div class="p-2 pl-0 font-bold tracking-wider text-xl">
+					<div class="p-2 pl-0 font-bold tracking-wider text-lg truncate">
 						{{ item.element.title }}
 					</div>
 				</a>
-				<div
-					class="link-item-url absolute bottom-[50px] left-2 w-[200px] truncate"
-				>
-					{{ formatUrl(item.element.url) }}
-				</div>
-				<div
-					class="btn-edit absolute bottom-[50px] right-2 p-2 bg-white rounded-full"
-					@click="onClickEdit(item.element)"
-				>
-					<IconEdit class="text-black w-[20px] h-[20px]" />
+				<div class="absolute bottom-[50px] flex items-end justify-between w-full px-2">
+					<div
+						class="link-item-url truncate"
+					>
+						{{ formatUrl(item.element.url) }}
+					</div>
+					<div
+						class="btn-edit p-2 bg-white rounded-full"
+						@click="onClickEdit(item.element)"
+					>
+						<IconEdit class="text-black w-[20px] h-[20px]" />
+					</div>
 				</div>
 			</div>
 		</template>
