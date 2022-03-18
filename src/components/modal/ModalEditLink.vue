@@ -32,7 +32,7 @@ const onClickDelete = async () => {
 	if (loading.isLoading) return
 	if (!props.dataSource) return
 	loading.start()
-	const isSuccess = linkForm.remove()
+	const isSuccess = await linkForm.remove()
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
