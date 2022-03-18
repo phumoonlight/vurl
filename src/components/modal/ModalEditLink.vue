@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { watchEffect } from 'vue'
 import { NModal, NInput } from 'naive-ui'
-import { ModalController } from '../../hooks/modal'
-import { useLoading } from '../../hooks/loading'
-import { useLinkForm } from '../../hooks/form'
-import { BookmarkDoc } from '../../services/links'
-import imageNoImage from '../../assets/no-image.png'
+import { ModalController } from '@/hooks/modal'
+import { useLoading } from '@/hooks/loading'
+import { useLinkForm } from '@/hooks/form'
+import { BookmarkDoc } from '@/services/links'
+import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController

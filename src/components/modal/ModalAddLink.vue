@@ -2,10 +2,10 @@
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NModal, NInput } from 'naive-ui'
-import { ModalController } from '../../hooks/modal'
-import { useLinkForm } from '../../hooks/form'
-import { useLoading } from '../../hooks/loading'
-import imageNoImage from '../../assets/no-image.png'
+import { ModalController } from '@/hooks/modal'
+import { useLinkForm } from '@/hooks/form'
+import { useLoading } from '@/hooks/loading'
+import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController

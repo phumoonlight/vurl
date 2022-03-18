@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { NModal, NInput } from 'naive-ui'
-import { ModalController } from '../../hooks/modal'
+import { ModalController } from '@/hooks/modal'
 import {
 	BookmarkGroupDoc,
 	createGroup,
 	useBookmarkGroups,
-} from '../../services/linkgroups'
-import { uploadImage } from '../../services/image'
-import { loadImage, getFileFromEvent } from '../../common/utils'
-import imageNoImage from '../../assets/no-image.png'
+} from '@/services/linkgroups'
+import { uploadImage } from '@/services/image'
+import { loadImage, getFileFromEvent } from '@/common/utils'
+import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController
