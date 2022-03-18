@@ -1,9 +1,10 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { getFileFromEvent, loadImage, wait } from '../common/utils'
 import { uploadImage } from '../services/image'
-import { createLink, deleteLink, updateLink } from '../services/links'
+import { createLink, deleteLink, updateLink, useLinks } from '../services/links'
 
 export const useLinkForm = () => {
+  const link = useLinks()
 	const linkId = ref('')
 	const name = ref('')
 	const url = ref('')
@@ -40,6 +41,7 @@ export const useLinkForm = () => {
 			title: name.value,
 			url: url.value,
 			timg: thumbnail,
+      order: link.data.length,
 		})
 		return !!resCreate
 	}

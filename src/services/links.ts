@@ -63,15 +63,14 @@ export const updateOrder = async (id: string, order: number) => {
 	}
 }
 
-export const useBookmarks = () => {
-	const bookmarks = ref<BookmarkDoc[]>([])
+const links = ref<BookmarkDoc[]>([])
+export const useLinks = () => {
 	const fetchData = async (groupId: string) => {
-		bookmarks.value = await getLinks(groupId)
-		bookmarks.value.sort((a, b) => b.order - a.order)
+		links.value = await getLinks(groupId)
+		links.value.sort((a, b) => b.order - a.order)
 	}
-
 	return reactive({
-		data: bookmarks,
+		data: links,
 		fetchData,
 		updateOrder,
 	})

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '../services/firebase'
-import { useBookmarks, BookmarkDoc } from '../services/links'
+import { useLinks, BookmarkDoc } from '../services/links'
 import { BookmarkGroupDoc, useBookmarkGroups } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
@@ -17,7 +17,7 @@ import GroupList from '../components/GroupList.vue'
 const route = useRoute()
 const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
-const links = useBookmarks()
+const links = useLinks()
 const group = useBookmarkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
