@@ -1,43 +1,68 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { NModal, NInput } from 'naive-ui'
+import { NModal, NInput, NSelect } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
 import { useLinkForm } from '@/hooks/form'
 import { useLoading } from '@/hooks/loading'
+import { useBookmarkGroups } from '@/services/linkgroups'
+import { useUrlQuery } from '@/hooks/urlquery'
 import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController
 }
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['created'])
 const props = defineProps<Props>()
-const route = useRoute()
+const groups = useBookmarkGroups()
 const form = useLinkForm()
 const loading = useLoading()
+const queryGroupId = useUrlQuery('group')
+const selectedGroup = ref('')
+
+const groupOptions = computed(() => {
+	return [
+		{
+			value: '',
+			label: 'Main',
+		},
+		...groups.data.map((group) => ({
+			value: group.id,
+			label: group.title,
+		})),
+	]
+})
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
-	const groupId = (route.query.group || '') as string
 	loading.start()
-	const isSuccess = await form.create(groupId)
+	const isSuccess = await form.create(selectedGroup.value)
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
-	emit('submit')
+	emit('created', selectedGroup.value)
 }
+
+watch(queryGroupId, (gid) => {
+	selectedGroup.value = gid
+})
 
 watch(
 	() => props.modal.isVisible,
-	async (isVisible) => {
-		if (!isVisible) return
+	async (value) => {
+		if (!value) return
+		selectedGroup.value = queryGroupId.value
 		form.name = ''
 		form.url = ''
 		form.imageUrl = ''
 		form.imageFile = null
 	}
 )
+
+onMounted(() => {
+	selectedGroup.value = queryGroupId.value
+})
 </script>
 
 <template>
@@ -57,7 +82,17 @@ watch(
 						/>
 					</div>
 				</div>
-				<div class="grid grid-cols-5 gap-4 items-center">
+				<div class="grid grid-cols-5 gap-4">
+					<label class="col-span-1" for="input-url">Group</label>
+					<div class="col-span-4">
+						<NSelect
+							class="col-span-4"
+							v-model:value="selectedGroup"
+							filterable
+							placeholder="Please select a song"
+							:options="groupOptions"
+						/>
+					</div>
 					<label class="col-span-1" for="input-name">Name</label>
 					<NInput
 						class="col-span-4"
@@ -105,5 +140,9 @@ watch(
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
 	border-radius: 20px;
+}
+
+label {
+	padding-top: 5px;
 }
 </style>

@@ -47,9 +47,10 @@ const onClickAdd = (key: string) => {
 	if (key === 'group') modalAddGroup.show()
 }
 
-const onSubmitAddLink = () => {
-	modalAddLink.hide()
-	links.fetchData(groupId.value)
+const onLinkCreated = (gid: string) => {
+	if (groupId.value === gid) return links.fetchData(gid)
+	if (gid) return router.push(`/?group=${gid}`)
+	router.push('/')
 }
 
 const onSubmitAddGroup = async (createdGroup: BookmarkGroupDoc) => {
@@ -80,7 +81,7 @@ watch(signedInUser.user, async (changedUser) => {
 </script>
 
 <template>
-	<ModalAddLink :modal="modalAddLink" @submit="onSubmitAddLink" />
+	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
 	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
 	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
