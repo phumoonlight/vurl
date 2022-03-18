@@ -63,7 +63,7 @@ const onSubmit = async () => {
 	const result: Partial<BookmarkGroupDoc> = {
 		id: resCreateGroup.data,
 		order: group.data.length,
-		title: inputName.value,
+		title: inputName.value || 'untitled',
 		timg: thumbnail,
 	}
 	props.modal.hide()
