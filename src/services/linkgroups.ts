@@ -20,15 +20,21 @@ export const getBookmarkGroups = async (): Promise<BookmarkGroupDoc[]> => {
 	}
 }
 
+const groups = ref<BookmarkGroupDoc[]>([])
 export const useBookmarkGroups = () => {
-	const groups = ref<BookmarkGroupDoc[]>([])
+	const sort = () => groups.value.sort((a, b) => b.order - a.order)
 	const fetchData = async () => {
 		groups.value = await getBookmarkGroups()
-		groups.value.sort((a, b) => a.order - b.order)
+		sort()
+	}
+	const add = (group: BookmarkGroupDoc) => {
+		groups.value.push(group)
+		sort()
 	}
 	return reactive({
 		data: groups,
 		fetchData,
+		add
 	})
 }
 

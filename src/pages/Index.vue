@@ -1,24 +1,21 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
-import Draggable from 'vuedraggable'
 import { useFirebaseSignedInUser } from '../services/firebase'
 import { useBookmarks, BookmarkDoc } from '../services/links'
-import { useBookmarkGroups } from '../services/linkgroups'
+import { BookmarkGroupDoc, useBookmarkGroups } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
-import imageNoImage from '../assets/no-image.png'
 import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
 import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
-import IconEdit from '../components/icons/IconEdit.vue'
-import ModalEditLink from '../components/modal/ModalEditLink.vue'
 import LinkList from '../components/LinkList.vue'
 import GroupList from '../components/GroupList.vue'
 
 const route = useRoute()
+const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
 const links = useBookmarks()
 const group = useBookmarkGroups()
@@ -55,9 +52,9 @@ const onSubmitAddLink = () => {
 	links.fetchData(groupId.value)
 }
 
-const onSubmitAddGroup = () => {
-	modalAddGroup.hide()
-	group.fetchData()
+const onSubmitAddGroup = async (createdGroup: BookmarkGroupDoc) => {
+	group.add(createdGroup)
+	router.push(`/?group=${createdGroup.id}`)
 }
 
 const onSubmitEditLink = async () => {

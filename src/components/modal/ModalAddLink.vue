@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import validator from 'validator'
-import { NModal, NInput, NButton, c } from 'naive-ui'
+import { NModal, NInput, } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
 import { createLink } from '../../services/links'
 import { uploadImage } from '../../services/image'
+import { loadImage } from '../../common/utils'
 import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
@@ -56,17 +56,11 @@ const onChangeInputImageFile = async (event: Event) => {
 	inputImageFile.value = file
 }
 
-const onChangeInputImageUrl = (value: string) => {
-	if (!validator.isURL(value)) {
-		previewImageUrl.value = ''
-		return
-	}
-	const img = new Image()
-	img.src = value
-	img.onload = () => {
-		previewImageUrl.value = img.src
-	}
-	img.onerror = () => {
+const onChangeInputImageUrl = async (value: string) => {
+	try {
+		await loadImage(value)
+		previewImageUrl.value = value
+	} catch (error) {
 		previewImageUrl.value = ''
 	}
 }
