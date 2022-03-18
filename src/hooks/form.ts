@@ -1,7 +1,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { getFileFromEvent, loadImage, wait } from '../common/utils'
 import { uploadImage } from '../services/image'
-import { deleteLink, updateLink } from '../services/links'
+import { createLink, deleteLink, updateLink } from '../services/links'
 
 export const useLinkForm = () => {
 	const linkId = ref('')
@@ -26,6 +26,22 @@ export const useLinkForm = () => {
 		url.value = ''
 		imageUrl.value = ''
 		imageFile.value = null
+	}
+
+	const create = async (groupId: string) => {
+		let thumbnail = imageUrl.value
+		if (imageFile.value) {
+			const resUpload = await uploadImage(imageFile.value)
+			if (!resUpload) return false
+			thumbnail = resUpload.uploadedUrl || ''
+		}
+		const resCreate = await createLink({
+			gid: groupId,
+			title: name.value,
+			url: url.value,
+			timg: thumbnail,
+		})
+		return !!resCreate
 	}
 
 	const update = async () => {
@@ -84,6 +100,7 @@ export const useLinkForm = () => {
 		previewImageUrl,
 		isImageUrlResolved,
 		clearInput,
+    create,
 		update,
 		remove,
 		handleFileChange,

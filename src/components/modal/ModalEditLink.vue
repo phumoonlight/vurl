@@ -15,13 +15,13 @@ interface Props {
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
 const loading = useLoading()
-const linkForm = useLinkForm()
+const form = useLinkForm()
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
 	if (!props.dataSource) return
 	loading.start()
-	const isSuccess = await linkForm.update()
+	const isSuccess = await form.update()
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
@@ -32,7 +32,7 @@ const onClickDelete = async () => {
 	if (loading.isLoading) return
 	if (!props.dataSource) return
 	loading.start()
-	const isSuccess = await linkForm.remove()
+	const isSuccess = await form.remove()
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
@@ -42,11 +42,11 @@ const onClickDelete = async () => {
 watchEffect(() => {
 	if (!props.dataSource) return
 	if (!props.modal.isVisible) return
-	linkForm.linkId = props.dataSource.id
-	linkForm.name = props.dataSource.title
-	linkForm.url = props.dataSource.url
-	linkForm.imageUrl = props.dataSource.timg
-	linkForm.imageFile = null
+	form.linkId = props.dataSource.id
+	form.name = props.dataSource.title
+	form.url = props.dataSource.url
+	form.imageUrl = props.dataSource.timg
+	form.imageFile = null
 })
 </script>
 
@@ -62,7 +62,7 @@ watchEffect(() => {
 					<div class="w-[300px] h-[200px]">
 						<img
 							class="h-[200px] w-full object-cover object-top rounded-[20px]"
-							:src="linkForm.previewImageUrl || imageNoImage"
+							:src="form.previewImageUrl || imageNoImage"
 							alt=""
 						/>
 					</div>
@@ -73,22 +73,22 @@ watchEffect(() => {
 						class="col-span-4"
 						id="input-name"
 						placeholder=""
-						v-model:value="linkForm.name"
+						v-model:value="form.name"
 					/>
 					<label class="col-span-1" for="input-url">URL</label>
 					<NInput
 						class="col-span-4"
 						id="input-url"
 						placeholder=""
-						v-model:value="linkForm.url"
+						v-model:value="form.url"
 					/>
 					<label class="col-span-1">Image</label>
 					<div class="col-span-4 flex flex-col gap-1">
-						<NInput placeholder="" v-model:value="linkForm.imageUrl" />
+						<NInput placeholder="" v-model:value="form.imageUrl" />
 						<div>OR</div>
 						<input
 							type="file"
-							@change="linkForm.handleFileChange"
+							@change="form.handleFileChange"
 							accept="image/*"
 						/>
 					</div>

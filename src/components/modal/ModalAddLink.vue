@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
-import { createLink } from '../../services/links'
-import { uploadImage } from '../../services/image'
-import { getFileFromEvent, loadImage } from '../../common/utils'
+import { useLinkForm } from '../../hooks/form'
+import { useLoading } from '../../hooks/loading'
 import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
@@ -15,67 +14,30 @@ interface Props {
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
 const route = useRoute()
-const inputTitle = ref('')
-const inputUrl = ref('')
-const inputImageUrl = ref('')
-const inputImageFile = ref<File | null>(null)
-const isLoading = ref(false)
-const previewImageUrl = ref('')
+const form = useLinkForm()
+const loading = useLoading()
 
 const onSubmit = async () => {
-	if (isLoading.value) return
-	isLoading.value = true
-	let thumbnail = inputImageUrl.value
-	if (inputImageFile.value) {
-		const res = await uploadImage(inputImageFile.value)
-		if (!res) {
-			isLoading.value = false
-			return
-		}
-		thumbnail = res.uploadedUrl
-	}
-	const resCreateLink = await createLink({
-		gid: route.query.group,
-		title: inputTitle.value,
-		url: inputUrl.value,
-		timg: thumbnail,
-	})
-	isLoading.value = false
-	if (!resCreateLink) return
+	if (loading.isLoading) return
+	const groupId = (route.query.group || '') as string
+	loading.start()
+	const isSuccess = await form.create(groupId)
+	loading.done()
+	if (!isSuccess) return
 	props.modal.hide()
 	emit('submit')
 }
 
-const onChangeInputImageFile = (event: Event) => {
-	const file = getFileFromEvent(event)
-	if (!file) {
-		inputImageUrl.value = ''
-		previewImageUrl.value = ''
-		inputImageFile.value = null
-		return
+watch(
+	() => props.modal.isVisible,
+	async (isVisible) => {
+		if (!isVisible) return
+		form.name = ''
+		form.url = ''
+		form.imageUrl = ''
+		form.imageFile = null
 	}
-	inputImageUrl.value = ''
-	previewImageUrl.value = URL.createObjectURL(file)
-	inputImageFile.value = file
-}
-
-const onChangeInputImageUrl = async (value: string) => {
-	isLoading.value = true
-	try {
-		await loadImage(value)
-		previewImageUrl.value = value
-	} catch (error) {
-		previewImageUrl.value = ''
-	}
-	isLoading.value = false
-}
-
-watch(props.modal, async () => {
-	inputTitle.value = ''
-	inputUrl.value = ''
-	inputImageUrl.value = ''
-	previewImageUrl.value = ''
-})
+)
 </script>
 
 <template>
@@ -90,7 +52,7 @@ watch(props.modal, async () => {
 					<div class="w-[300px] h-[200px]">
 						<img
 							class="h-[200px] w-full object-cover object-top rounded-[20px]"
-							:src="previewImageUrl || imageNoImage"
+							:src="form.previewImageUrl || imageNoImage"
 							alt=""
 						/>
 					</div>
@@ -101,26 +63,22 @@ watch(props.modal, async () => {
 						class="col-span-4"
 						id="input-name"
 						placeholder=""
-						v-model:value="inputTitle"
+						v-model:value="form.name"
 					/>
 					<label class="col-span-1" for="input-url">URL</label>
 					<NInput
 						class="col-span-4"
 						id="input-url"
 						placeholder=""
-						v-model:value="inputUrl"
+						v-model:value="form.url"
 					/>
 					<label class="col-span-1">Image</label>
 					<div class="col-span-4 flex flex-col gap-1">
-						<NInput
-							placeholder=""
-							@input="onChangeInputImageUrl"
-							v-model:value="inputImageUrl"
-						/>
+						<NInput placeholder="" v-model:value="form.imageUrl" />
 						<div>OR</div>
 						<input
 							type="file"
-							@change="onChangeInputImageFile"
+							@change="form.handleFileChange"
 							accept="image/*"
 						/>
 					</div>
@@ -130,7 +88,7 @@ watch(props.modal, async () => {
 				<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
 				<button
 					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400 disabled:opacity-50 disabled:bg-green-500"
-					:disabled="isLoading"
+					:disabled="loading.isLoading"
 					@click="onSubmit"
 				>
 					Save
