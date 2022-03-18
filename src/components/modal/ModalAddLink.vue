@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { NModal, NInput, } from 'naive-ui'
+import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '../../hooks/modal'
 import { createLink } from '../../services/links'
 import { uploadImage } from '../../services/image'
-import { loadImage } from '../../common/utils'
+import { getFileFromEvent, loadImage } from '../../common/utils'
 import imageNoImage from '../../assets/no-image.png'
 
 interface Props {
@@ -19,36 +19,39 @@ const inputTitle = ref('')
 const inputUrl = ref('')
 const inputImageUrl = ref('')
 const inputImageFile = ref<File | null>(null)
+const isLoading = ref(false)
 const previewImageUrl = ref('')
 
 const onSubmit = async () => {
+	if (isLoading.value) return
+	isLoading.value = true
 	let thumbnail = inputImageUrl.value
 	if (inputImageFile.value) {
 		const res = await uploadImage(inputImageFile.value)
-		if (!res) return
+		if (!res) {
+			isLoading.value = false
+			return
+		}
 		thumbnail = res.uploadedUrl
 	}
-	await createLink({
+	const resCreateLink = await createLink({
 		gid: route.query.group,
-		timg: thumbnail,
 		title: inputTitle.value,
 		url: inputUrl.value,
+		timg: thumbnail,
 	})
+	isLoading.value = false
+	if (!resCreateLink) return
 	props.modal.hide()
 	emit('submit')
 }
 
-const onChangeInputImageFile = async (event: Event) => {
-	const target = event.target as HTMLInputElement
-	if (!target.files) {
-		inputImageUrl.value = ''
-		previewImageUrl.value = ''
-		return
-	}
-	const file = target.files[0]
+const onChangeInputImageFile = (event: Event) => {
+	const file = getFileFromEvent(event)
 	if (!file) {
 		inputImageUrl.value = ''
 		previewImageUrl.value = ''
+		inputImageFile.value = null
 		return
 	}
 	inputImageUrl.value = ''
@@ -57,12 +60,14 @@ const onChangeInputImageFile = async (event: Event) => {
 }
 
 const onChangeInputImageUrl = async (value: string) => {
+	isLoading.value = true
 	try {
 		await loadImage(value)
 		previewImageUrl.value = value
 	} catch (error) {
 		previewImageUrl.value = ''
 	}
+	isLoading.value = false
 }
 
 watch(props.modal, async () => {
@@ -113,14 +118,19 @@ watch(props.modal, async () => {
 							v-model:value="inputImageUrl"
 						/>
 						<div>OR</div>
-						<input type="file" @change="onChangeInputImageFile" accept="image/*" />
+						<input
+							type="file"
+							@change="onChangeInputImageFile"
+							accept="image/*"
+						/>
 					</div>
 				</div>
 			</div>
 			<div class="flex justify-end items-center mt-12">
 				<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
 				<button
-					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
+					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400 disabled:opacity-50 disabled:bg-green-500"
+					:disabled="isLoading"
 					@click="onSubmit"
 				>
 					Save
