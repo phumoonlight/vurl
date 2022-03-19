@@ -66,49 +66,69 @@ const onChange = (event: any) => {
 			@change="onChange"
 		>
 			<template #item="item">
-				<router-link
-					:to="`/?group=${item.element.id}`"
-					class="group-item flex items-end bg-gray-700 min-w-[200px] p-2 h-[90px] bg-cover text-white mb-2"
-					:class="{ 'group-item-active': item.element.id === activeGroupId }"
-					:style="{
-						backgroundImage: `url(${item.element.timg})`,
-					}"
-				>
-					<div class="drop-shadow-lg bg-black p-1">
-						{{ item.element.title }}
+				<div class="item relative">
+					<router-link
+						:to="`/?group=${item.element.id}`"
+						class="group-item flex items-end bg-gray-700 min-w-[200px] p-1 h-[90px] bg-cover text-white mb-2"
+						:class="{ 'group-item-active': item.element.id === activeGroupId }"
+						:style="{
+							backgroundImage: `url(${item.element.timg})`,
+						}"
+					>
+						<div class="drop-shadow-lg text-lg bg-black p-1 px-2">
+							{{ item.element.title }}
+						</div>
+					</router-link>
+					<div
+						class="btn-edit p-2 bg-white rounded-full"
+						@click="onClickEdit(item.element)"
+					>
+						<IconEdit class="text-black w-[20px] h-[20px]" />
 					</div>
-				</router-link>
+				</div>
 			</template>
 		</Draggable>
 	</div>
 </template>
 
 <style scoped>
+.btn-edit {
+	display: none;
+	position: absolute;
+	cursor: pointer;
+	right: 5px;
+	bottom: 5px;
+}
+
 .list {
 	overflow-x: hidden;
 }
 .list::-webkit-scrollbar {
 	width: 5px;
-  background-color: #464646;
+	background-color: #464646;
 }
 
 .list::-webkit-scrollbar-thumb {
-  background: rgb(175, 175, 175); 
+	background: rgb(175, 175, 175);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(230, 230, 230);
+	background: rgb(230, 230, 230);
 }
 
 .group-item {
-	opacity: 0.75;
+	filter: brightness(0.8);
 }
 
 .group-item:hover {
-	opacity: 0.9;
+	filter: brightness(0.9);
 }
 
 .group-item.group-item-active {
-	opacity: 1;
+	filter: brightness(1);
+}
+
+.item:hover .btn-edit {
+	display: flex;
 }
 </style>
