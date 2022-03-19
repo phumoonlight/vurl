@@ -3,10 +3,12 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '../services/firebase'
-import { useLinks, BookmarkDoc } from '../services/links'
-import { BookmarkGroupDoc, useBookmarkGroups } from '../services/linkgroups'
+import { useLinks } from '../services/links'
+import { GroupDocument } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
+import { useGlobalStore } from '@/hooks/store'
+import { useMutationLinkGroups } from '@/hooks/linkgroups'
 import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
@@ -18,11 +20,10 @@ const route = useRoute()
 const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
 const links = useLinks()
-const group = useBookmarkGroups()
+const store = useGlobalStore()
+const mutationLinkGroups = useMutationLinkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
-const modalEditLink = useModal()
-const editingLink = ref<BookmarkDoc | null>(null)
 const isLoading = ref(true)
 
 const isUserNotSignedIn = computed(() => {
@@ -32,11 +33,6 @@ const isUserNotSignedIn = computed(() => {
 const groupId = computed(() => {
 	return (route.query.group as string) || ''
 })
-
-const formatUrl = (url: string) => {
-	const formattedUrl = url.replace(/^https?:\/\//, '').replace(/www./, '')
-	return formattedUrl
-}
 
 const onClickSignOut = () => {
 	signedInUser.signOut()
@@ -53,8 +49,8 @@ const onLinkCreated = (gid: string) => {
 	router.push('/')
 }
 
-const onSubmitAddGroup = async (createdGroup: BookmarkGroupDoc) => {
-	group.add(createdGroup)
+const onSubmitAddGroup = async (createdGroup: GroupDocument) => {
+	mutationLinkGroups.localAdd(createdGroup)
 	router.push(`/?group=${createdGroup.id}`)
 }
 
@@ -75,7 +71,7 @@ watch(signedInUser.user, async (changedUser) => {
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
 	await links.fetchData(groupId.value)
-	await group.fetchData()
+	await mutationLinkGroups.fetchData()
 	isLoading.value = false
 })
 </script>
@@ -140,7 +136,7 @@ watch(signedInUser.user, async (changedUser) => {
 			</div>
 		</div>
 		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
-			<GroupList :data-source="group.data" :active-group-id="groupId" />
+			<GroupList :data-source="store.groups" :active-group-id="groupId" />
 			<div
 				v-if="!links.data.length && !isLoading"
 				class="flex justify-center h-full items-center"

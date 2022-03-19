@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable'
-import { BookmarkGroupDoc } from '../services/linkgroups'
+import { GroupDocument } from '../services/linkgroups'
 import IconEdit from '../components/icons/IconEdit.vue'
+import { useGlobalStore } from '@/hooks/store'
+import { useModal } from '@/hooks/modal'
+import ModalEditGroup from './modal/ModalEditGroup.vue'
 
 interface Props {
-	dataSource: BookmarkGroupDoc[]
+	dataSource: GroupDocument[]
 	activeGroupId: string
 }
 
@@ -16,15 +19,18 @@ interface DragChangeEvent {
 	}
 }
 
-const props = defineProps<Props>()
 const emit = defineEmits(['edit', 'reorder'])
+const props = defineProps<Props>()
+const store = useGlobalStore()
+const modal = useModal()
 
 const getRandomOrderBetween = (min: number, max: number) => {
 	return Math.random() * (max - min) + min
 }
 
-const onClickEdit = (item: BookmarkGroupDoc) => {
-	emit('edit', item)
+const onClickEdit = (item: GroupDocument) => {
+	store.editingGroup = item
+	modal.show()
 }
 
 const onChange = (event: any) => {
@@ -50,6 +56,7 @@ const onChange = (event: any) => {
 </script>
 
 <template>
+	<ModalEditGroup :modal="modal" />
 	<div class="flex flex-col">
 		<router-link
 			to="/"

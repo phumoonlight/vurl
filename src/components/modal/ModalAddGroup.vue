@@ -3,9 +3,9 @@ import { ref, watch } from 'vue'
 import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
 import {
-	BookmarkGroupDoc,
+	GroupDocument,
 	createGroup,
-	useBookmarkGroups,
+	useLinkGroups,
 } from '@/services/linkgroups'
 import { uploadImage } from '@/services/image'
 import { loadImage, getFileFromEvent } from '@/common/utils'
@@ -17,7 +17,7 @@ interface Props {
 
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
-const group = useBookmarkGroups()
+const groups = useLinkGroups()
 const inputName = ref('')
 const inputDesc = ref('')
 const inputImageUrl = ref('')
@@ -57,12 +57,12 @@ const onSubmit = async () => {
 		timg: thumbnail,
 		title: inputName.value,
 		desc: inputDesc.value,
-		order: group.data.length,
+		order: groups.data.length,
 	})
 	if (!resCreateGroup) return
-	const result: Partial<BookmarkGroupDoc> = {
+	const result: Partial<GroupDocument> = {
 		id: resCreateGroup.data,
-		order: group.data.length,
+		order: groups.data.length,
 		title: inputName.value || 'untitled',
 		timg: thumbnail,
 	}

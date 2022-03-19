@@ -1,68 +1,52 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { NModal, NInput, NSelect } from 'naive-ui'
+import { watch } from 'vue'
+import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
-import { useLinkForm } from '@/hooks/form'
+import { useFormGroup } from '@/hooks/formgroup'
 import { useLoading } from '@/hooks/loading'
-import { useLinkGroups } from '@/services/linkgroups'
-import { useUrlQuery } from '@/hooks/urlquery'
+import { useGlobalStore } from '@/hooks/store'
 import imageNoImage from '@/assets/no-image.png'
+import { useMutationLinkGroups } from '@/hooks/linkgroups'
 
 interface Props {
 	modal: ModalController
 }
 
-const emit = defineEmits(['created'])
+const emit = defineEmits(['edited'])
 const props = defineProps<Props>()
-const groups = useLinkGroups()
-const form = useLinkForm()
 const loading = useLoading()
-const queryGroupId = useUrlQuery('group')
-const selectedGroup = ref('')
-
-const groupOptions = computed(() => {
-	return [
-		{
-			value: '',
-			label: 'Main',
-		},
-		...groups.data.map((group) => ({
-			value: group.id,
-			label: group.title,
-		})),
-	]
-})
+const form = useFormGroup()
+const store = useGlobalStore()
+const mutationLinkGroups = useMutationLinkGroups()
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
+	if (!store.editingGroup) return
 	loading.start()
-	const isSuccess = await form.create(selectedGroup.value)
+	const result = await form.update()
 	loading.done()
-	if (!isSuccess) return
+	if (!result) return
+	mutationLinkGroups.localUpdate({
+		...store.editingGroup,
+		title: result.title || '',
+		desc: result.desc || '',
+		timg: result.timg || '',
+	})
 	props.modal.hide()
-	emit('created', selectedGroup.value)
+	emit('edited')
 }
-
-watch(queryGroupId, (gid) => {
-	selectedGroup.value = gid
-})
 
 watch(
 	() => props.modal.isVisible,
-	async (value) => {
+	(value) => {
 		if (!value) return
-		selectedGroup.value = queryGroupId.value
-		form.name = ''
-		form.url = ''
-		form.imageUrl = ''
+		if (!store.editingGroup) return
+		form.name = store.editingGroup.title
+		form.description = store.editingGroup.desc
+		form.imageUrl = store.editingGroup.timg
 		form.imageFile = null
 	}
 )
-
-onMounted(() => {
-	selectedGroup.value = queryGroupId.value
-})
 </script>
 
 <template>
@@ -71,7 +55,7 @@ onMounted(() => {
 		v-model:show="modal.isVisible"
 	>
 		<div>
-			<div class="font-bold text-3xl mb-8 tracking-wide">Add link</div>
+			<div class="font-bold text-3xl mb-8 tracking-wide">Edit group</div>
 			<div class="flex flex-col gap-8">
 				<div class="flex justify-center mr-4">
 					<div class="w-[300px] h-[200px]">
@@ -82,17 +66,7 @@ onMounted(() => {
 						/>
 					</div>
 				</div>
-				<div class="grid grid-cols-5 gap-4">
-					<label class="col-span-1" for="input-url">Group</label>
-					<div class="col-span-4">
-						<NSelect
-							class="col-span-4"
-							v-model:value="selectedGroup"
-							filterable
-							placeholder="Please select a song"
-							:options="groupOptions"
-						/>
-					</div>
+				<div class="grid grid-cols-5 gap-4 items-center">
 					<label class="col-span-1" for="input-name">Name</label>
 					<NInput
 						class="col-span-4"
@@ -100,12 +74,12 @@ onMounted(() => {
 						placeholder=""
 						v-model:value="form.name"
 					/>
-					<label class="col-span-1" for="input-url">URL</label>
+					<label class="col-span-1" for="input-url">Description</label>
 					<NInput
 						class="col-span-4"
 						id="input-url"
 						placeholder=""
-						v-model:value="form.url"
+						v-model:value="form.description"
 					/>
 					<label class="col-span-1">Image</label>
 					<div class="col-span-4 flex flex-col gap-1">
@@ -122,8 +96,7 @@ onMounted(() => {
 			<div class="flex justify-end items-center mt-12">
 				<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
 				<button
-					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400 disabled:opacity-50 disabled:bg-green-500"
-					:disabled="loading.isLoading"
+					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
 					@click="onSubmit"
 				>
 					Save
@@ -132,7 +105,6 @@ onMounted(() => {
 		</div>
 	</NModal>
 </template>
-
 <style scoped>
 .modal {
 	background: rgba(107, 107, 107, 0.5);
@@ -140,9 +112,5 @@ onMounted(() => {
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
 	border-radius: 20px;
-}
-
-label {
-	padding-top: 5px;
 }
 </style>
