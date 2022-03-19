@@ -59,7 +59,7 @@ const onChange = (event: any) => {
 			<strong class="font-serif tracking-wide">Main</strong>
 		</router-link>
 		<Draggable
-			class="max-h-[75vh] overflow-scroll"
+			class="list max-h-[70vh] overflow-y-scroll pr-2"
 			group="link-groups"
 			item-key="id"
 			:list="dataSource"
@@ -84,6 +84,22 @@ const onChange = (event: any) => {
 </template>
 
 <style scoped>
+.list {
+	overflow-x: hidden;
+}
+.list::-webkit-scrollbar {
+	width: 5px;
+  background-color: #464646;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: rgb(175, 175, 175); 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(230, 230, 230);
+}
+
 .group-item {
 	opacity: 0.75;
 }
