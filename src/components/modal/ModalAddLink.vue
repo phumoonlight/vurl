@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import { NModal, NInput, NSelect } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
 import { useLinkForm } from '@/hooks/form'
 import { useLoading } from '@/hooks/loading'
-import { useLinkGroups } from '@/services/linkgroups'
 import { useUrlQuery } from '@/hooks/urlquery'
 import imageNoImage from '@/assets/no-image.png'
+import { useGlobalStore } from '@/hooks/store'
 
 interface Props {
 	modal: ModalController
@@ -15,7 +14,7 @@ interface Props {
 
 const emit = defineEmits(['created'])
 const props = defineProps<Props>()
-const groups = useLinkGroups()
+const store = useGlobalStore()
 const form = useLinkForm()
 const loading = useLoading()
 const queryGroupId = useUrlQuery('group')
@@ -27,7 +26,7 @@ const groupOptions = computed(() => {
 			value: '',
 			label: 'Main',
 		},
-		...groups.data.map((group) => ({
+		...store.groups.map((group) => ({
 			value: group.id,
 			label: group.title,
 		})),

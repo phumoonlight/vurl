@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { watch } from 'vue'
-import { NModal, NInput } from 'naive-ui'
+import { ref, watch } from 'vue'
+import { NModal, NInput, NPopconfirm } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
 import { useFormGroup } from '@/hooks/formgroup'
 import { useLoading } from '@/hooks/loading'
 import { useGlobalStore } from '@/hooks/store'
 import imageNoImage from '@/assets/no-image.png'
 import { useMutationLinkGroups } from '@/hooks/linkgroups'
+import { useRouter } from 'vue-router'
+import { wait } from '@/common/utils'
 
 interface Props {
 	modal: ModalController
@@ -14,10 +16,12 @@ interface Props {
 
 const emit = defineEmits(['edited'])
 const props = defineProps<Props>()
+const router = useRouter()
 const loading = useLoading()
 const form = useFormGroup()
 const store = useGlobalStore()
 const mutationLinkGroups = useMutationLinkGroups()
+const isPopupVisible = ref(false)
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
@@ -34,6 +38,20 @@ const onSubmit = async () => {
 	})
 	props.modal.hide()
 	emit('edited')
+}
+
+const onClickDelete = async () => {
+	isPopupVisible.value = false
+	if (!store.editingGroup) return
+	if (loading.isLoading) return
+	loading.start()
+	const result = await form.remove()
+	loading.done()
+	if (!result) return
+	store.editingGroup = null
+	props.modal.hide()
+	await mutationLinkGroups.fetchData()
+	router.replace('/')
 }
 
 watch(
@@ -93,14 +111,42 @@ watch(
 					</div>
 				</div>
 			</div>
-			<div class="flex justify-end items-center mt-12">
-				<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
-				<button
-					class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
-					@click="onSubmit"
-				>
-					Save
-				</button>
+			<div class="flex justify-between items-center mt-12">
+				<div>
+					<NPopconfirm v-model:show="isPopupVisible">
+						<template #trigger>
+							<button
+								class="text-red-500 p-1 disabled:opacity-50"
+								:disabled="loading.isLoading"
+							>
+								Delete
+							</button>
+						</template>
+						<template #action>
+							<button
+								class="text-white font-bold p-1 disabled:opacity-50 bg-red-500 rounded-full px-4"
+								:disabled="loading.isLoading"
+								@click="onClickDelete"
+							>
+								Confirm delete
+							</button>
+						</template>
+						<div v-if="store.editingGroup" class="flex gap-1">
+							<span>All links in</span>
+							<span class="font-bold">{{ store.editingGroup?.title }}</span>
+							<span>will be move to <span class="font-bold">Main</span></span>
+						</div>
+					</NPopconfirm>
+				</div>
+				<div>
+					<button class="text-gray-400 mr-8" @click="modal.hide">Cancel</button>
+					<button
+						class="w-[100px] font-bold bg-green-500 rounded-full p-2 hover:bg-green-400"
+						@click="onSubmit"
+					>
+						Save
+					</button>
+				</div>
 			</div>
 		</div>
 	</NModal>

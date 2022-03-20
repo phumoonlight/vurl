@@ -2,14 +2,11 @@
 import { ref, watch } from 'vue'
 import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
-import {
-	GroupDocument,
-	createGroup,
-	useLinkGroups,
-} from '@/services/linkgroups'
+import { GroupDocument, createGroup } from '@/services/linkgroups'
 import { uploadImage } from '@/services/image'
 import { loadImage, getFileFromEvent } from '@/common/utils'
 import imageNoImage from '@/assets/no-image.png'
+import { useGlobalStore } from '@/hooks/store'
 
 interface Props {
 	modal: ModalController
@@ -17,7 +14,7 @@ interface Props {
 
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
-const groups = useLinkGroups()
+const store = useGlobalStore()
 const inputName = ref('')
 const inputDesc = ref('')
 const inputImageUrl = ref('')
@@ -57,13 +54,14 @@ const onSubmit = async () => {
 		timg: thumbnail,
 		title: inputName.value,
 		desc: inputDesc.value,
-		order: groups.data.length,
+		order: store.groups.length,
 	})
 	if (!resCreateGroup) return
 	const result: Partial<GroupDocument> = {
 		id: resCreateGroup.data,
-		order: groups.data.length,
+		order: store.groups.length,
 		title: inputName.value || 'untitled',
+		desc: inputDesc.value || 'no description.',
 		timg: thumbnail,
 	}
 	props.modal.hide()

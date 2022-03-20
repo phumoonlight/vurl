@@ -82,7 +82,7 @@ const onChange = (event: any) => {
 							backgroundImage: `url(${item.element.timg})`,
 						}"
 					>
-						<div class="drop-shadow-lg text-lg bg-black p-1 px-2">
+						<div class="group-item-name drop-shadow-lg text-lg p-1 px-2">
 							{{ item.element.title }}
 						</div>
 					</router-link>
@@ -99,6 +99,12 @@ const onChange = (event: any) => {
 </template>
 
 <style scoped>
+.group-item-name {
+	background: rgba(54, 54, 54, 0.75);
+	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(5px);
+}
+
 .btn-edit {
 	display: none;
 	position: absolute;
