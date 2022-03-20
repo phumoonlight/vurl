@@ -102,7 +102,7 @@ watch(signedInUser.user, async (changedUser) => {
 								{{ signedInUser.user.value.displayName }}
 							</div>
 							<div
-								class="p-2 hover:bg-gray-300 cursor-pointer rounded-b"
+								class="p-2 hover:bg-gray-600 cursor-pointer rounded-b"
 								@click="onClickSignOut"
 							>
 								Sign out

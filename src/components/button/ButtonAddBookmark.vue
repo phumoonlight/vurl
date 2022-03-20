@@ -33,13 +33,13 @@ const onSelect = (key: string) => {
 		<div class="w-[200px]">
 			<div class="p-2 opacity-90">Add</div>
 			<div
-				class="p-2 hover:bg-gray-300 cursor-pointer text-lg font-semibold"
+				class="p-2 hover:bg-gray-600 cursor-pointer text-lg font-semibold"
 				@click="emit('select', 'link')"
 			>
 				Link
 			</div>
 			<div
-				class="p-2 hover:bg-gray-300 cursor-pointer text-lg font-semibold"
+				class="p-2 hover:bg-gray-600 cursor-pointer text-lg font-semibold"
 				@click="emit('select', 'group')"
 			>
 				Group
