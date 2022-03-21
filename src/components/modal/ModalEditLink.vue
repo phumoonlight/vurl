@@ -4,12 +4,12 @@ import { NModal, NInput } from 'naive-ui'
 import { ModalController } from '@/hooks/modal'
 import { useLoading } from '@/hooks/loading'
 import { useLinkForm } from '@/hooks/form'
-import { BookmarkDoc } from '@/services/links'
+import { LinkDocument } from '@/services/link/link.type'
 import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController
-	dataSource: BookmarkDoc | null
+	dataSource: LinkDocument | null
 }
 
 const emit = defineEmits(['submit'])

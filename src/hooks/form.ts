@@ -1,10 +1,11 @@
 import { computed, reactive, ref, watch } from 'vue'
-import { getFileFromEvent, loadImage, wait } from '../common/utils'
-import { uploadImage } from '../services/image'
-import { createLink, deleteLink, updateLink, useLinks } from '../services/links'
+import { getFileFromEvent, loadImage, wait } from '@/common/utils'
+import { uploadImage } from '@/services/image'
+import { useLink } from '@/services/link/link.hook'
+import { createLink, deleteLink, updateLink } from '@/services/link/link.http'
 
 export const useLinkForm = () => {
-  const link = useLinks()
+	const link = useLink()
 	const linkId = ref('')
 	const name = ref('')
 	const url = ref('')
@@ -41,7 +42,7 @@ export const useLinkForm = () => {
 			title: name.value,
 			url: url.value,
 			timg: thumbnail,
-      order: link.data.length,
+			order: link.links.length,
 		})
 		return !!resCreate
 	}
@@ -102,7 +103,7 @@ export const useLinkForm = () => {
 		previewImageUrl,
 		isImageUrlResolved,
 		clearInput,
-    create,
+		create,
 		update,
 		remove,
 		handleFileChange,

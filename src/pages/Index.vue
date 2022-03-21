@@ -3,12 +3,14 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '../services/firebase'
-import { useLinks } from '../services/links'
+import { useLink } from '@/services/link/link.hook'
 import { GroupDocument } from '../services/linkgroups'
 import { cookie } from '../common/cookie'
 import { useModal } from '../hooks/modal'
 import { useGlobalStore } from '@/hooks/store'
 import { useMutationLinkGroups } from '@/hooks/linkgroups'
+import { useUrlQuery } from '@/hooks/urlquery'
+import { useLoading } from '@/hooks/loading'
 import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
 import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '../components/modal/ModalAddLink.vue'
@@ -19,19 +21,15 @@ import GroupList from '../components/GroupList.vue'
 const route = useRoute()
 const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
-const links = useLinks()
+const link = useLink()
 const store = useGlobalStore()
 const mutationLinkGroups = useMutationLinkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
-const isLoading = ref(true)
+const queryGroupId = useUrlQuery('group')
 
 const isUserNotSignedIn = computed(() => {
 	return !signedInUser.user.value && !signedInUser.isLoading.value
-})
-
-const groupId = computed(() => {
-	return (route.query.group as string) || ''
 })
 
 const onClickSignOut = () => {
@@ -44,7 +42,7 @@ const onClickAdd = (key: string) => {
 }
 
 const onLinkCreated = (gid: string) => {
-	if (groupId.value === gid) return links.fetchData(gid)
+	if (queryGroupId.value === gid) return link.fetchData(gid)
 	if (gid) return router.push(`/?group=${gid}`)
 	router.push('/')
 }
@@ -54,23 +52,15 @@ const onSubmitAddGroup = async (createdGroup: GroupDocument) => {
 	router.push(`/?group=${createdGroup.id}`)
 }
 
-const onSubmitEditLink = async () => {
-	links.fetchData(groupId.value)
-}
-
-const onReorderLink = async ({ itemId = '', newOrder = 0 }) => {
-	links.updateOrder(itemId, newOrder)
-}
-
 watch(route, () => {
-	links.fetchData(groupId.value)
+	link.fetchData(queryGroupId.value)
 })
 
 watch(signedInUser.user, async (changedUser) => {
 	if (!changedUser) return
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
-	await links.fetchData(groupId.value)
+	await link.fetchData(queryGroupId.value)
 	await mutationLinkGroups.fetchData()
 	isLoading.value = false
 })
@@ -136,19 +126,9 @@ watch(signedInUser.user, async (changedUser) => {
 			</div>
 		</div>
 		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
-			<GroupList :data-source="store.groups" :active-group-id="groupId" />
-			<div
-				v-if="!links.data.length && !isLoading"
-				class="flex justify-center h-full items-center"
-			>
-				There aren't any links yet
-			</div>
-			<LinkList
-				v-if="links.data.length && !isLoading"
-				:data-source="links.data"
-				@editsubmit="onSubmitEditLink"
-				@reorder="onReorderLink"
-			/>
+			<GroupList :data-source="store.groups" :active-group-id="queryGroupId" />
+			
+			<LinkList />
 		</div>
 	</div>
 </template>
