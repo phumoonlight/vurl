@@ -41,7 +41,6 @@ const onSubmit = async () => {
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
-	link.fetchData(queryGroupId.value)
 	emit('created', selectedGroup.value)
 }
 
