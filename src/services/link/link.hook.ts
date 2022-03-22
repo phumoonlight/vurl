@@ -1,34 +1,33 @@
-import {
-	createGroup,
-	deleteGroup,
-	GroupDocument,
-	updateGroup,
-	useLinkGroups,
-} from '@/services/linkgroups'
 import { computed, reactive, ref, watch } from 'vue'
-import { getFileFromEvent, loadImage, wait } from '../common/utils'
-import { uploadImage } from '../services/image'
-import { useGlobalStore } from './store'
+import { getFileFromEvent } from '@/common/file'
+import { loadImage } from '@/common/image'
+import { wait } from '@/common/timer'
+import { uploadImage } from '@/services/image'
+import { LinkDocument } from './link.type'
+import * as linkHttp from './link.http'
 
-export interface FormGroup {
-	name: string
-	description: string
-	imageUrl: string
-	imageFile: File | null
-	previewImageUrl: string
-	isImageUrlResolved: boolean
-	clearInput: () => void
-	create: (groupId: string) => Promise<boolean>
-	update: () => Promise<Partial<GroupDocument> | null>
-	remove: () => Promise<boolean>
-	handleFileChange: (event: Event) => void
+const editingLink = ref<LinkDocument | null>(null)
+const links = ref<LinkDocument[]>([])
+
+export const useLink = () => {
+	const sortByOrder = () => {
+		links.value.sort((a, b) => b.order - a.order)
+	}
+	const fetchData = async (groupId: string) => {
+		links.value = await linkHttp.getLinks(groupId)
+		sortByOrder()
+	}
+	return reactive({
+		links,
+		editingLink,
+		fetchData,
+	})
 }
 
-export const useFormGroup = (): FormGroup => {
-	const store = useGlobalStore()
-	const groups = useLinkGroups()
+export const useLinkForm = () => {
+	const link = useLink()
 	const name = ref('')
-	const description = ref('')
+	const url = ref('')
 	const imageUrl = ref('')
 	const imageFile = ref<File | null>(null)
 	const isImageUrlResolved = ref(false)
@@ -45,7 +44,7 @@ export const useFormGroup = (): FormGroup => {
 
 	const clearInput = () => {
 		name.value = ''
-		description.value = ''
+		url.value = ''
 		imageUrl.value = ''
 		imageFile.value = null
 	}
@@ -57,40 +56,35 @@ export const useFormGroup = (): FormGroup => {
 			if (!resUpload) return false
 			thumbnail = resUpload.uploadedUrl || ''
 		}
-		const resCreate = await createGroup({
+		const resCreate = await linkHttp.createLink({
 			gid: groupId,
 			title: name.value,
+			url: url.value,
 			timg: thumbnail,
-			order: groups.data.length,
+			order: link.links.length,
 		})
 		return !!resCreate
 	}
 
 	const update = async () => {
-		if (!store.editingGroup) return null
+		if (!link.editingLink) return false
 		let thumbnail = imageUrl.value
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
-			if (!resUpload) return null
+			if (!resUpload) return false
 			thumbnail = resUpload.uploadedUrl || ''
 		}
-		const resUpdate = await updateGroup(store.editingGroup.id, {
+		const resUpdate = await linkHttp.updateLink(link.editingLink.id, {
 			title: name.value,
-			description: description.value,
+			url: url.value,
 			timg: thumbnail,
 		})
-		if (!resUpdate) return null
-		const updated: Partial<GroupDocument> = {
-			title: name.value,
-			desc: description.value,
-			timg: thumbnail,
-		}
-		return updated
+		return !!resUpdate
 	}
 
 	const remove = async () => {
-		if (!store.editingGroup) return false
-		const res = await deleteGroup(store.editingGroup.id)
+		if (!link.editingLink) return false
+		const res = await linkHttp.deleteLink(link.editingLink.id)
 		await wait(500)
 		return !!res
 	}
@@ -121,7 +115,7 @@ export const useFormGroup = (): FormGroup => {
 
 	return reactive({
 		name,
-		description,
+		url,
 		imageUrl,
 		imageFile,
 		previewImageUrl,

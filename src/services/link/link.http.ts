@@ -1,20 +1,10 @@
-import { reactive, ref } from 'vue'
-import { httpClient } from '../common/http'
+import { httpClient } from '@/common/http'
+import { LinkDocument } from './link.type'
 
-export interface BookmarkDoc {
-	id: string
-	gid: string
-	uid: string
-	timg: string
-	title: string
-	url: string
-	order: number
-}
-
-export const getLinks = async (groupId: string): Promise<any[]> => {
+export const getLinks = async (groupId: string): Promise<LinkDocument[]> => {
 	try {
 		const url = `api/vurl/links/?group=${groupId}`
-		const res = await httpClient.get<{ data: BookmarkDoc[] }>(url)
+		const res = await httpClient.get<{ data: LinkDocument[] }>(url)
 		return res.data.data || []
 	} catch (error) {
 		return []
@@ -61,17 +51,4 @@ export const updateOrder = async (id: string, order: number) => {
 	} catch (error) {
 		return null
 	}
-}
-
-const links = ref<BookmarkDoc[]>([])
-export const useLinks = () => {
-	const fetchData = async (groupId: string) => {
-		links.value = await getLinks(groupId)
-		links.value.sort((a, b) => b.order - a.order)
-	}
-	return reactive({
-		data: links,
-		fetchData,
-		updateOrder,
-	})
 }

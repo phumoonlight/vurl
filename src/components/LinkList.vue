@@ -1,28 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import Draggable from 'vuedraggable'
-import { BookmarkDoc } from '../services/links'
-import imageNoImage from '../assets/no-image.png'
-import IconEdit from '../components/icons/IconEdit.vue'
-import { useModal } from '../hooks/modal'
-import ModalEditLink from './modal/ModalEditLink.vue'
+import { DragChangeEvent } from '@/common/types'
+import { useModal } from '@/common/modal'
+import { useUrlQuery } from '@/common/urlquery'
+import { LinkDocument } from '@/services/link/link.type'
+import { useLink } from '@/services/link/link.hook'
+import { updateOrder } from '@/services/link/link.http'
+import imageNoImage from '@/assets/no-image.png'
+import IconEdit from '@/components/icons/IconEdit.vue'
+import ModalEditLink from '@/components/modal/ModalEditLink.vue'
+import { useGlobalLoading } from '@/common/loading'
 
-interface Props {
-	dataSource: BookmarkDoc[]
-}
-
-interface DragChangeEvent {
-	moved: {
-		element: any
-		newIndex: number
-		oldIndex: number
-	}
-}
-
-const emit = defineEmits(['reorder', 'editsubmit'])
-const props = defineProps<Props>()
-const modalEditLink = useModal()
-const editingLink = ref<BookmarkDoc | null>(null)
+const queryGroupId = useUrlQuery('group')
+const globalLoading = useGlobalLoading()
+const modal = useModal()
+const link = useLink()
 
 const formatUrl = (url: string) => {
 	const formattedUrl = url.replace(/^https?:\/\//, '').replace(/www./, '')
@@ -33,14 +25,14 @@ const getNewOrderBetween = (min: number, max: number) => {
 	return Math.random() * (max - min) + min
 }
 
-const onClickEdit = (item: BookmarkDoc) => {
-	editingLink.value = item
-	modalEditLink.show()
+const onClickEdit = (item: LinkDocument) => {
+	link.editingLink = item
+	modal.show()
 }
 
 const onSubmitEdit = async () => {
-	modalEditLink.hide()
-	emit('editsubmit')
+	modal.hide()
+	link.fetchData(queryGroupId.value)
 }
 
 const onChange = (event: any) => {
@@ -49,8 +41,8 @@ const onChange = (event: any) => {
 	const targetItem = typedEvent.moved.element
 	const itemId = targetItem.id
 	const newIndex = typedEvent.moved.newIndex
-	const behindItem = props.dataSource[newIndex + 1]
-	const frontItem = props.dataSource[newIndex - 1]
+	const behindItem = link.links[newIndex + 1]
+	const frontItem = link.links[newIndex - 1]
 	let newOrder = 0
 	if (!frontItem && behindItem) {
 		newOrder = behindItem.order + FACTOR
@@ -59,24 +51,27 @@ const onChange = (event: any) => {
 	} else if (frontItem && !behindItem) {
 		newOrder = frontItem.order - FACTOR
 	}
-	emit('reorder', {
-		itemId,
-		newOrder: newOrder,
-	})
+	updateOrder(itemId, newOrder)
 }
 </script>
 
 <template>
 	<ModalEditLink
-		:modal="modalEditLink"
-		:dataSource="editingLink"
+		:modal="modal"
+		:dataSource="link.editingLink"
 		@submit="onSubmitEdit"
 	/>
+	<div
+		v-if="!link.links.length && !globalLoading.isLoading"
+		class="flex justify-center h-full items-center"
+	>
+		There aren't any links yet
+	</div>
 	<Draggable
 		class="grid grid-cols-4 gap-4 items-start"
 		group="links"
 		item-key="id"
-		:list="dataSource"
+		:list="link.links"
 		@change="onChange"
 	>
 		<template #item="item">
@@ -93,10 +88,10 @@ const onChange = (event: any) => {
 						{{ item.element.title }}
 					</div>
 				</a>
-				<div class="absolute bottom-[50px] flex items-end justify-between w-full px-2">
-					<div
-						class="link-item-url truncate"
-					>
+				<div
+					class="absolute bottom-[50px] flex items-end justify-between w-full px-2"
+				>
+					<div class="link-item-url truncate">
 						{{ formatUrl(item.element.url) }}
 					</div>
 					<div

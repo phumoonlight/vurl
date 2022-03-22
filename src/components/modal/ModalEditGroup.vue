@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { NModal, NInput, NPopconfirm } from 'naive-ui'
-import { ModalController } from '@/hooks/modal'
-import { useFormGroup } from '@/hooks/formgroup'
-import { useLoading } from '@/hooks/loading'
-import { useGlobalStore } from '@/hooks/store'
-import imageNoImage from '@/assets/no-image.png'
-import { useMutationLinkGroups } from '@/hooks/linkgroups'
 import { useRouter } from 'vue-router'
-import { wait } from '@/common/utils'
+import { NModal, NInput, NPopconfirm } from 'naive-ui'
+import { ModalController } from '@/common/modal'
+import { useLoading } from '@/common/loading'
+import {
+	useLinkGroup,
+	useLinkGroupForm,
+} from '@/services/linkgroup/linkgroup.hook'
+import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController
@@ -18,20 +18,19 @@ const emit = defineEmits(['edited'])
 const props = defineProps<Props>()
 const router = useRouter()
 const loading = useLoading()
-const form = useFormGroup()
-const store = useGlobalStore()
-const mutationLinkGroups = useMutationLinkGroups()
+const form = useLinkGroupForm()
+const group = useLinkGroup()
 const isPopupVisible = ref(false)
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
-	if (!store.editingGroup) return
+	if (!group.editingGroup) return
 	loading.start()
 	const result = await form.update()
 	loading.done()
 	if (!result) return
-	mutationLinkGroups.localUpdate({
-		...store.editingGroup,
+	group.localUpdate({
+		...group.editingGroup,
 		title: result.title || '',
 		desc: result.desc || '',
 		timg: result.timg || '',
@@ -42,15 +41,15 @@ const onSubmit = async () => {
 
 const onClickDelete = async () => {
 	isPopupVisible.value = false
-	if (!store.editingGroup) return
+	if (!group.editingGroup) return
 	if (loading.isLoading) return
 	loading.start()
 	const result = await form.remove()
 	loading.done()
 	if (!result) return
-	store.editingGroup = null
+	group.editingGroup = null
 	props.modal.hide()
-	await mutationLinkGroups.fetchData()
+	await group.fetchData()
 	router.replace('/')
 }
 
@@ -58,10 +57,10 @@ watch(
 	() => props.modal.isVisible,
 	(value) => {
 		if (!value) return
-		if (!store.editingGroup) return
-		form.name = store.editingGroup.title
-		form.description = store.editingGroup.desc
-		form.imageUrl = store.editingGroup.timg
+		if (!group.editingGroup) return
+		form.name = group.editingGroup.title
+		form.description = group.editingGroup.desc
+		form.imageUrl = group.editingGroup.timg
 		form.imageFile = null
 	}
 )
@@ -131,9 +130,9 @@ watch(
 								Confirm delete
 							</button>
 						</template>
-						<div v-if="store.editingGroup" class="flex gap-1">
+						<div v-if="group.editingGroup" class="flex gap-1">
 							<span>All links in</span>
-							<span class="font-bold">{{ store.editingGroup?.title }}</span>
+							<span class="font-bold">{{ group.editingGroup.title }}</span>
 							<span>will be move to <span class="font-bold">Main</span></span>
 						</div>
 					</NPopconfirm>

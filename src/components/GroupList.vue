@@ -1,45 +1,33 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable'
-import { GroupDocument } from '../services/linkgroups'
-import IconEdit from '../components/icons/IconEdit.vue'
-import { useGlobalStore } from '@/hooks/store'
-import { useModal } from '@/hooks/modal'
-import ModalEditGroup from './modal/ModalEditGroup.vue'
+import { DragChangeEvent } from '@/common/types'
+import { useModal } from '@/common/modal'
+import { useUrlQuery } from '@/common/urlquery'
+import { GroupDocument } from '@/services/linkgroup/linkgroup.type'
+import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
+import IconEdit from '@/components/icons/IconEdit.vue'
+import ModalEditGroup from '@/components/modal/ModalEditGroup.vue'
 
-interface Props {
-	dataSource: GroupDocument[]
-	activeGroupId: string
-}
-
-interface DragChangeEvent {
-	moved: {
-		element: any
-		newIndex: number
-		oldIndex: number
-	}
-}
-
-const emit = defineEmits(['edit', 'reorder'])
-const props = defineProps<Props>()
-const store = useGlobalStore()
+const group = useLinkGroup()
 const modal = useModal()
+const queryGroupId = useUrlQuery('group')
 
 const getRandomOrderBetween = (min: number, max: number) => {
 	return Math.random() * (max - min) + min
 }
 
 const onClickEdit = (item: GroupDocument) => {
-	store.editingGroup = item
+	group.editingGroup = item
 	modal.show()
 }
 
-const onChange = (event: any) => {
+const onDragChange = (event: any) => {
 	const typedEvent: DragChangeEvent = event
 	const targetItem = typedEvent.moved.element
 	const itemId = targetItem.id
 	const newIndex = typedEvent.moved.newIndex
-	const nextItem = props.dataSource[newIndex + 1]
-	const prevItem = props.dataSource[newIndex + -1]
+	const nextItem = group.groups[newIndex + 1]
+	const prevItem = group.groups[newIndex + -1]
 	let newOrder = 0
 	if (!prevItem && nextItem) {
 		newOrder = nextItem.order + 0.01
@@ -48,10 +36,6 @@ const onChange = (event: any) => {
 	} else if (prevItem && !nextItem) {
 		newOrder = prevItem.order - 0.01
 	}
-	emit('reorder', {
-		itemId,
-		newOrder: newOrder,
-	})
 }
 </script>
 
@@ -61,7 +45,7 @@ const onChange = (event: any) => {
 		<router-link
 			to="/"
 			class="group-item min-w-[200px] p-2 mb-4 bg-gray-700"
-			:class="{ 'group-item-active': !activeGroupId }"
+			:class="{ 'group-item-active': !queryGroupId }"
 		>
 			<strong class="font-serif tracking-wide">Main</strong>
 		</router-link>
@@ -69,15 +53,15 @@ const onChange = (event: any) => {
 			class="list max-h-[70vh] overflow-y-scroll pr-2"
 			group="link-groups"
 			item-key="id"
-			:list="dataSource"
-			@change="onChange"
+			:list="group.groups"
+			@change="onDragChange"
 		>
 			<template #item="item">
 				<div class="item relative">
 					<router-link
 						:to="`/?group=${item.element.id}`"
 						class="group-item flex items-end bg-gray-700 min-w-[200px] p-1 h-[90px] bg-cover text-white mb-2"
-						:class="{ 'group-item-active': item.element.id === activeGroupId }"
+						:class="{ 'group-item-active': item.element.id === queryGroupId }"
 						:style="{
 							backgroundImage: `url(${item.element.timg})`,
 						}"

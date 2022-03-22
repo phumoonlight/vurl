@@ -1,84 +1,68 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
-import { useFirebaseSignedInUser } from '../services/firebase'
-import { useLinks } from '../services/links'
-import { GroupDocument } from '../services/linkgroups'
-import { cookie } from '../common/cookie'
-import { useModal } from '../hooks/modal'
-import { useGlobalStore } from '@/hooks/store'
-import { useMutationLinkGroups } from '@/hooks/linkgroups'
-import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
-import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
-import ModalAddLink from '../components/modal/ModalAddLink.vue'
-import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
-import LinkList from '../components/LinkList.vue'
-import GroupList from '../components/GroupList.vue'
+import { useFirebaseSignedInUser } from '@/services/firebase'
+import { useLink } from '@/services/link/link.hook'
+import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
+import { cookie } from '@/common/cookie'
+import { useModal } from '@/common/modal'
+import { useUrlQuery } from '@/common/urlquery'
+import { useGlobalLoading } from '@/common/loading'
+import ButtonSignInGoogle from '@/components/button/ButtonSignInGoogle.vue'
+import ButtonAddBookmark from '@/components/button/ButtonAddBookmark.vue'
+import ModalAddLink from '@/components/modal/ModalAddLink.vue'
+import ModalAddGroup from '@/components/modal/ModalAddGroup.vue'
+import LinkList from '@/components/LinkList.vue'
+import GroupList from '@/components/GroupList.vue'
 
 const route = useRoute()
 const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
-const links = useLinks()
-const store = useGlobalStore()
-const mutationLinkGroups = useMutationLinkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
-const isLoading = ref(true)
+const loading = useGlobalLoading()
+const queryGroupId = useUrlQuery('group')
+const link = useLink()
+const linkGroup = useLinkGroup()
 
 const isUserNotSignedIn = computed(() => {
 	return !signedInUser.user.value && !signedInUser.isLoading.value
-})
-
-const groupId = computed(() => {
-	return (route.query.group as string) || ''
 })
 
 const onClickSignOut = () => {
 	signedInUser.signOut()
 }
 
-const onClickAdd = (key: string) => {
+const onClickAdd = (key: 'link' | 'group') => {
 	if (key === 'link') modalAddLink.show()
 	if (key === 'group') modalAddGroup.show()
 }
 
 const onLinkCreated = (gid: string) => {
-	if (groupId.value === gid) return links.fetchData(gid)
+	if (queryGroupId.value === gid) return link.fetchData(gid)
 	if (gid) return router.push(`/?group=${gid}`)
 	router.push('/')
 }
 
-const onSubmitAddGroup = async (createdGroup: GroupDocument) => {
-	mutationLinkGroups.localAdd(createdGroup)
-	router.push(`/?group=${createdGroup.id}`)
-}
-
-const onSubmitEditLink = async () => {
-	links.fetchData(groupId.value)
-}
-
-const onReorderLink = async ({ itemId = '', newOrder = 0 }) => {
-	links.updateOrder(itemId, newOrder)
-}
-
 watch(route, () => {
-	links.fetchData(groupId.value)
+	link.fetchData(queryGroupId.value)
 })
 
 watch(signedInUser.user, async (changedUser) => {
 	if (!changedUser) return
+	loading.start()
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
-	await links.fetchData(groupId.value)
-	await mutationLinkGroups.fetchData()
-	isLoading.value = false
+	await link.fetchData(queryGroupId.value)
+	await linkGroup.fetchData()
+	loading.done()
 })
 </script>
 
 <template>
 	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
-	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
+	<ModalAddGroup :modal="modalAddGroup" />
 	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
@@ -136,19 +120,8 @@ watch(signedInUser.user, async (changedUser) => {
 			</div>
 		</div>
 		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
-			<GroupList :data-source="store.groups" :active-group-id="groupId" />
-			<div
-				v-if="!links.data.length && !isLoading"
-				class="flex justify-center h-full items-center"
-			>
-				There aren't any links yet
-			</div>
-			<LinkList
-				v-if="links.data.length && !isLoading"
-				:data-source="links.data"
-				@editsubmit="onSubmitEditLink"
-				@reorder="onReorderLink"
-			/>
+			<GroupList />
+			<LinkList />
 		</div>
 	</div>
 </template>
