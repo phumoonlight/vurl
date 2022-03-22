@@ -1,81 +1,37 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { NModal, NInput } from 'naive-ui'
-import { ModalController } from '@/hooks/modal'
-import { GroupDocument, createGroup } from '@/services/linkgroups'
-import { uploadImage } from '@/services/image'
-import { loadImage, getFileFromEvent } from '@/common/utils'
+import { ModalController } from '@/common/modal'
+import { useLoading } from '@/common/loading'
+import {
+	useLinkGroup,
+	useLinkGroupForm,
+} from '@/services/linkgroup/linkgroup.hook'
 import imageNoImage from '@/assets/no-image.png'
-import { useGlobalStore } from '@/hooks/store'
 
 interface Props {
 	modal: ModalController
 }
 
-const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
-const store = useGlobalStore()
-const inputName = ref('')
-const inputDesc = ref('')
-const inputImageUrl = ref('')
-const inputImageFile = ref<File | null>(null)
-const previewImageUrl = ref('')
-
-const onChangeInputImageFile = (event: Event) => {
-	const file = getFileFromEvent(event)
-	if (!file) {
-		inputImageUrl.value = ''
-		previewImageUrl.value = ''
-		inputImageFile.value = null
-		return
-	}
-	inputImageUrl.value = ''
-	previewImageUrl.value = URL.createObjectURL(file)
-	inputImageFile.value = file
-}
-
-const onChangeInputImageUrl = async (value: string) => {
-	try {
-		await loadImage(value)
-		previewImageUrl.value = value
-	} catch (error) {
-		previewImageUrl.value = ''
-	}
-}
+const loading = useLoading()
+const group = useLinkGroup()
+const form = useLinkGroupForm()
 
 const onSubmit = async () => {
-	let thumbnail = inputImageUrl.value
-	if (inputImageFile.value) {
-		const resUploadImage = await uploadImage(inputImageFile.value)
-		if (!resUploadImage) return
-		thumbnail = resUploadImage.uploadedUrl
-	}
-	const resCreateGroup = await createGroup({
-		timg: thumbnail,
-		title: inputName.value,
-		desc: inputDesc.value,
-		order: store.groups.length,
-	})
-	if (!resCreateGroup) return
-	const result: Partial<GroupDocument> = {
-		id: resCreateGroup.data,
-		order: store.groups.length,
-		title: inputName.value || 'untitled',
-		desc: inputDesc.value || 'no description.',
-		timg: thumbnail,
-	}
+	if (loading.isLoading) return
+	loading.start()
+	const isSuccess = await form.create()
+	loading.done()
+	if (!isSuccess) return
+	await group.fetchData()
 	props.modal.hide()
-	emit('submit', result)
 }
 
 watch(
 	() => props.modal.isVisible,
 	() => {
-		inputName.value = ''
-		inputDesc.value = ''
-		inputImageUrl.value = ''
-		previewImageUrl.value = ''
-		inputImageFile.value = null
+		form.clearInput()
 	}
 )
 </script>
@@ -92,7 +48,7 @@ watch(
 					<div class="w-[300px] h-[200px]">
 						<img
 							class="h-[200px] w-full object-cover object-top rounded-[20px]"
-							:src="previewImageUrl || imageNoImage"
+							:src="form.previewImageUrl || imageNoImage"
 							alt=""
 						/>
 					</div>
@@ -103,27 +59,23 @@ watch(
 						class="col-span-4"
 						id="input-name"
 						placeholder=""
-						v-model:value="inputName"
+						v-model:value="form.name"
 					/>
 					<label class="col-span-1" for="input-url">Description</label>
 					<NInput
 						class="col-span-4"
 						id="input-url"
 						placeholder=""
-						v-model:value="inputDesc"
+						v-model:value="form.description"
 					/>
 					<label class="col-span-1">Image</label>
 					<div class="col-span-4 flex flex-col gap-1">
-						<NInput
-							placeholder=""
-							@input="onChangeInputImageUrl"
-							v-model:value="inputImageUrl"
-						/>
+						<NInput placeholder="" v-model:value="form.imageUrl" />
 						<div>OR</div>
 						<input
 							type="file"
-							@change="onChangeInputImageFile"
 							accept="image/*"
+							@change="form.handleFileChange"
 						/>
 					</div>
 				</div>

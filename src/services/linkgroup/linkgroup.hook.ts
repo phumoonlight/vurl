@@ -1,32 +1,43 @@
-import {
-	createGroup,
-	deleteGroup,
-	GroupDocument,
-	updateGroup,
-	useLinkGroups,
-} from '@/services/linkgroups'
 import { computed, reactive, ref, watch } from 'vue'
-import { getFileFromEvent, loadImage, wait } from '../common/utils'
-import { uploadImage } from '../services/image'
-import { useGlobalStore } from './store'
+import { uploadImage } from '@/services/image'
+import { loadImage } from '@/common/image'
+import { wait } from '@/common/timer'
+import { getFileFromEvent } from '@/common/file'
+import { FormGroup, GroupDocument } from './linkgroup.type'
+import * as linkGroupHttp from './linkgroup.http'
 
-export interface FormGroup {
-	name: string
-	description: string
-	imageUrl: string
-	imageFile: File | null
-	previewImageUrl: string
-	isImageUrlResolved: boolean
-	clearInput: () => void
-	create: (groupId: string) => Promise<boolean>
-	update: () => Promise<Partial<GroupDocument> | null>
-	remove: () => Promise<boolean>
-	handleFileChange: (event: Event) => void
+const editingGroup = ref<GroupDocument | null>(null)
+const groups = ref<GroupDocument[]>([])
+
+export const useLinkGroup = () => {
+	const sort = () => {
+		groups.value.sort((a, b) => b.order - a.order)
+	}
+	const fetchData = async () => {
+		groups.value = await linkGroupHttp.getGroups()
+		sort()
+	}
+	const localAdd = (group: GroupDocument) => {
+		groups.value.push(group)
+		sort()
+	}
+	const localUpdate = (editedGroup: GroupDocument) => {
+		groups.value = groups.value.map((group) => {
+			if (group.id !== editedGroup.id) return group
+			return editedGroup
+		})
+	}
+	return reactive({
+		groups,
+		editingGroup,
+		fetchData,
+		localAdd,
+		localUpdate,
+	})
 }
 
-export const useFormGroup = (): FormGroup => {
-	const store = useGlobalStore()
-	const groups = useLinkGroups()
+export const useLinkGroupForm = (): FormGroup => {
+	const group = useLinkGroup()
 	const name = ref('')
 	const description = ref('')
 	const imageUrl = ref('')
@@ -50,33 +61,33 @@ export const useFormGroup = (): FormGroup => {
 		imageFile.value = null
 	}
 
-	const create = async (groupId: string) => {
+	const create = async () => {
 		let thumbnail = imageUrl.value
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return false
 			thumbnail = resUpload.uploadedUrl || ''
 		}
-		const resCreate = await createGroup({
-			gid: groupId,
+		const resCreate = await linkGroupHttp.createGroup({
 			title: name.value,
+			desc: description.value,
 			timg: thumbnail,
-			order: groups.data.length,
+			order: group.groups.length,
 		})
 		return !!resCreate
 	}
 
 	const update = async () => {
-		if (!store.editingGroup) return null
+		if (!group.editingGroup) return null
 		let thumbnail = imageUrl.value
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return null
 			thumbnail = resUpload.uploadedUrl || ''
 		}
-		const resUpdate = await updateGroup(store.editingGroup.id, {
+		const resUpdate = await linkGroupHttp.updateGroup(group.editingGroup.id, {
 			title: name.value,
-			description: description.value,
+			desc: description.value,
 			timg: thumbnail,
 		})
 		if (!resUpdate) return null
@@ -89,8 +100,8 @@ export const useFormGroup = (): FormGroup => {
 	}
 
 	const remove = async () => {
-		if (!store.editingGroup) return false
-		const res = await deleteGroup(store.editingGroup.id)
+		if (!group.editingGroup) return false
+		const res = await linkGroupHttp.deleteGroup(group.editingGroup.id)
 		await wait(500)
 		return !!res
 	}

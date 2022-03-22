@@ -1,32 +1,29 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
-import { useFirebaseSignedInUser } from '../services/firebase'
+import { useFirebaseSignedInUser } from '@/services/firebase'
 import { useLink } from '@/services/link/link.hook'
-import { GroupDocument } from '../services/linkgroups'
-import { cookie } from '../common/cookie'
-import { useModal } from '../hooks/modal'
-import { useGlobalStore } from '@/hooks/store'
-import { useMutationLinkGroups } from '@/hooks/linkgroups'
-import { useUrlQuery } from '@/hooks/urlquery'
-import { useLoading } from '@/hooks/loading'
-import ButtonSignInGoogle from '../components/button/ButtonSignInGoogle.vue'
-import ButtonAddBookmark from '../components/button/ButtonAddBookmark.vue'
-import ModalAddLink from '../components/modal/ModalAddLink.vue'
-import ModalAddGroup from '../components/modal/ModalAddGroup.vue'
-import LinkList from '../components/LinkList.vue'
-import GroupList from '../components/GroupList.vue'
+import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
+import { cookie } from '@/common/cookie'
+import { useModal } from '@/common/modal'
+import { useUrlQuery } from '@/common/urlquery'
+import { useGlobalLoading } from '@/common/loading'
+import ButtonSignInGoogle from '@/components/button/ButtonSignInGoogle.vue'
+import ButtonAddBookmark from '@/components/button/ButtonAddBookmark.vue'
+import ModalAddLink from '@/components/modal/ModalAddLink.vue'
+import ModalAddGroup from '@/components/modal/ModalAddGroup.vue'
+import LinkList from '@/components/LinkList.vue'
+import GroupList from '@/components/GroupList.vue'
 
 const route = useRoute()
-const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
-const link = useLink()
-const store = useGlobalStore()
-const mutationLinkGroups = useMutationLinkGroups()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
+const loading = useGlobalLoading()
 const queryGroupId = useUrlQuery('group')
+const link = useLink()
+const linkGroup = useLinkGroup()
 
 const isUserNotSignedIn = computed(() => {
 	return !signedInUser.user.value && !signedInUser.isLoading.value
@@ -36,21 +33,16 @@ const onClickSignOut = () => {
 	signedInUser.signOut()
 }
 
-const onClickAdd = (key: string) => {
+const onClickAdd = (key: 'link' | 'group') => {
 	if (key === 'link') modalAddLink.show()
 	if (key === 'group') modalAddGroup.show()
 }
 
-const onLinkCreated = (gid: string) => {
-	if (queryGroupId.value === gid) return link.fetchData(gid)
-	if (gid) return router.push(`/?group=${gid}`)
-	router.push('/')
-}
-
-const onSubmitAddGroup = async (createdGroup: GroupDocument) => {
-	mutationLinkGroups.localAdd(createdGroup)
-	router.push(`/?group=${createdGroup.id}`)
-}
+// const onLinkCreated = (gid: string) => {
+// 	if (queryGroupId.value === gid) return link.fetchData(gid)
+// 	if (gid) return router.push(`/?group=${gid}`)
+// 	router.push('/')
+// }
 
 watch(route, () => {
 	link.fetchData(queryGroupId.value)
@@ -58,17 +50,18 @@ watch(route, () => {
 
 watch(signedInUser.user, async (changedUser) => {
 	if (!changedUser) return
+	loading.start()
 	const token = await changedUser.getIdToken()
 	cookie.setAccessToken(token)
 	await link.fetchData(queryGroupId.value)
-	await mutationLinkGroups.fetchData()
-	isLoading.value = false
+	await linkGroup.fetchData()
+	loading.done()
 })
 </script>
 
 <template>
-	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
-	<ModalAddGroup :modal="modalAddGroup" @submit="onSubmitAddGroup" />
+	<ModalAddLink :modal="modalAddLink" />
+	<ModalAddGroup :modal="modalAddGroup" />
 	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
@@ -126,8 +119,7 @@ watch(signedInUser.user, async (changedUser) => {
 			</div>
 		</div>
 		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
-			<GroupList :data-source="store.groups" :active-group-id="queryGroupId" />
-			
+			<GroupList />
 			<LinkList />
 		</div>
 	</div>

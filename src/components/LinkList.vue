@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import Draggable from 'vuedraggable'
-import { LinkDocument } from '../services/link/link.type'
-import imageNoImage from '../assets/no-image.png'
-import IconEdit from '../components/icons/IconEdit.vue'
-import { useModal } from '../hooks/modal'
-import ModalEditLink from './modal/ModalEditLink.vue'
+import { DragChangeEvent } from '@/common/types'
+import { useModal } from '@/common/modal'
+import { useUrlQuery } from '@/common/urlquery'
+import { LinkDocument } from '@/services/link/link.type'
 import { useLink } from '@/services/link/link.hook'
-import { useUrlQuery } from '@/hooks/urlquery'
-
-interface DragChangeEvent {
-	moved: {
-		element: any
-		newIndex: number
-		oldIndex: number
-	}
-}
+import { updateOrder } from '@/services/link/link.http'
+import imageNoImage from '@/assets/no-image.png'
+import IconEdit from '@/components/icons/IconEdit.vue'
+import ModalEditLink from '@/components/modal/ModalEditLink.vue'
+import { useGlobalLoading } from '@/common/loading'
 
 const queryGroupId = useUrlQuery('group')
-const modalEditLink = useModal()
+const globalLoading = useGlobalLoading()
+const modal = useModal()
 const link = useLink()
 
 const formatUrl = (url: string) => {
@@ -32,11 +27,11 @@ const getNewOrderBetween = (min: number, max: number) => {
 
 const onClickEdit = (item: LinkDocument) => {
 	link.editingLink = item
-	modalEditLink.show()
+	modal.show()
 }
 
 const onSubmitEdit = async () => {
-	modalEditLink.hide()
+	modal.hide()
 	link.fetchData(queryGroupId.value)
 }
 
@@ -56,18 +51,18 @@ const onChange = (event: any) => {
 	} else if (frontItem && !behindItem) {
 		newOrder = frontItem.order - FACTOR
 	}
-	link.updateOrder(itemId, newOrder)
+	updateOrder(itemId, newOrder)
 }
 </script>
 
 <template>
 	<ModalEditLink
-		:modal="modalEditLink"
+		:modal="modal"
 		:dataSource="link.editingLink"
 		@submit="onSubmitEdit"
 	/>
 	<div
-		v-if="!link.links.length"
+		v-if="!link.links.length && !globalLoading.isLoading"
 		class="flex justify-center h-full items-center"
 	>
 		There aren't any links yet

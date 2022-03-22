@@ -8,15 +8,12 @@ export interface ModalController {
 
 export const useModal = (): ModalController => {
 	const isVisible = ref(false)
-
 	const show = () => {
 		isVisible.value = true
 	}
-
 	const hide = () => {
 		isVisible.value = false
 	}
-
 	return reactive({
 		isVisible,
 		show,

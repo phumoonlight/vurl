@@ -1,25 +1,24 @@
 <script setup lang="ts">
 import { watchEffect } from 'vue'
 import { NModal, NInput } from 'naive-ui'
-import { ModalController } from '@/hooks/modal'
-import { useLoading } from '@/hooks/loading'
-import { useLinkForm } from '@/hooks/form'
-import { LinkDocument } from '@/services/link/link.type'
+import { ModalController } from '@/common/modal'
+import { useLoading } from '@/common/loading'
+import { useLink, useLinkForm } from '@/services/link/link.hook'
 import imageNoImage from '@/assets/no-image.png'
 
 interface Props {
 	modal: ModalController
-	dataSource: LinkDocument | null
 }
 
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
 const loading = useLoading()
 const form = useLinkForm()
+const link = useLink()
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
-	if (!props.dataSource) return
+	if (!link.editingLink) return
 	loading.start()
 	const isSuccess = await form.update()
 	loading.done()
@@ -30,7 +29,7 @@ const onSubmit = async () => {
 
 const onClickDelete = async () => {
 	if (loading.isLoading) return
-	if (!props.dataSource) return
+	if (!link.editingLink) return
 	loading.start()
 	const isSuccess = await form.remove()
 	loading.done()
@@ -40,12 +39,11 @@ const onClickDelete = async () => {
 }
 
 watchEffect(() => {
-	if (!props.dataSource) return
+	if (!link.editingLink) return
 	if (!props.modal.isVisible) return
-	form.linkId = props.dataSource.id
-	form.name = props.dataSource.title
-	form.url = props.dataSource.url
-	form.imageUrl = props.dataSource.timg
+	form.name = link.editingLink.title
+	form.url = link.editingLink.url
+	form.imageUrl = link.editingLink.timg
 	form.imageFile = null
 })
 </script>
