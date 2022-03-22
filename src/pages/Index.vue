@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '@/services/firebase'
 import { useLink } from '@/services/link/link.hook'
@@ -17,6 +17,7 @@ import LinkList from '@/components/LinkList.vue'
 import GroupList from '@/components/GroupList.vue'
 
 const route = useRoute()
+const router = useRouter()
 const signedInUser = useFirebaseSignedInUser()
 const modalAddLink = useModal()
 const modalAddGroup = useModal()
@@ -38,11 +39,11 @@ const onClickAdd = (key: 'link' | 'group') => {
 	if (key === 'group') modalAddGroup.show()
 }
 
-// const onLinkCreated = (gid: string) => {
-// 	if (queryGroupId.value === gid) return link.fetchData(gid)
-// 	if (gid) return router.push(`/?group=${gid}`)
-// 	router.push('/')
-// }
+const onLinkCreated = (gid: string) => {
+	if (queryGroupId.value === gid) return link.fetchData(gid)
+	if (gid) return router.push(`/?group=${gid}`)
+	router.push('/')
+}
 
 watch(route, () => {
 	link.fetchData(queryGroupId.value)
@@ -60,7 +61,7 @@ watch(signedInUser.user, async (changedUser) => {
 </script>
 
 <template>
-	<ModalAddLink :modal="modalAddLink" />
+	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
 	<ModalAddGroup :modal="modalAddGroup" />
 	<div>
 		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">

@@ -12,6 +12,7 @@ interface Props {
 	modal: ModalController
 }
 
+const emit = defineEmits(['created'])
 const props = defineProps<Props>()
 const form = useLinkForm()
 const link = useLink()
@@ -41,6 +42,7 @@ const onSubmit = async () => {
 	if (!isSuccess) return
 	props.modal.hide()
 	link.fetchData(queryGroupId.value)
+	emit('created', selectedGroup.value)
 }
 
 watch(queryGroupId, (gid) => {
