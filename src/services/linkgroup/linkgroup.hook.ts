@@ -5,31 +5,43 @@ import { wait } from '@/common/timer'
 import { getFileFromEvent } from '@/common/file'
 import { FormGroup, GroupDocument } from './linkgroup.type'
 import * as linkGroupHttp from './linkgroup.http'
+import { useUrlQuery } from '@/common/urlquery'
 
 const editingGroup = ref<GroupDocument | null>(null)
 const groups = ref<GroupDocument[]>([])
 
 export const useLinkGroup = () => {
+	const queryGroupId = useUrlQuery('group')
+
+	const viewingGroup = computed(() => {
+		return groups.value.find((group) => group.id === queryGroupId.value)
+	})
+
 	const sort = () => {
 		groups.value.sort((a, b) => b.order - a.order)
 	}
+
 	const fetchData = async () => {
 		groups.value = await linkGroupHttp.getGroups()
 		sort()
 	}
+
 	const localAdd = (group: GroupDocument) => {
 		groups.value.push(group)
 		sort()
 	}
+
 	const localUpdate = (editedGroup: GroupDocument) => {
 		groups.value = groups.value.map((group) => {
 			if (group.id !== editedGroup.id) return group
 			return editedGroup
 		})
 	}
+
 	return reactive({
 		groups,
 		editingGroup,
+		viewingGroup,
 		fetchData,
 		localAdd,
 		localUpdate,

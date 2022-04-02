@@ -30,6 +30,20 @@ const isUserNotSignedIn = computed(() => {
 	return !signedInUser.user.value && !signedInUser.isLoading.value
 })
 
+const viewingGroupName = computed(() => {
+	if (loading.isLoading) return ''
+	if (!queryGroupId.value) return 'Main'
+	if (!linkGroup.viewingGroup) return 'Unknown Group'
+	return linkGroup.viewingGroup.title
+})
+
+const viewingGroupDesc = computed(() => {
+	if (loading.isLoading) return ''
+	if (!queryGroupId.value) return ''
+	if (!linkGroup.viewingGroup) return ''
+	return linkGroup.viewingGroup.desc
+})
+
 const onClickSignOut = () => {
 	signedInUser.signOut()
 }
@@ -121,7 +135,15 @@ watch(signedInUser.user, async (changedUser) => {
 		</div>
 		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
 			<GroupList />
-			<LinkList />
+			<div>
+				<div class="mb-4">
+					<div class="text-3xl p-2 font-bold tracking-wider">
+						{{ viewingGroupName }}
+					</div>
+					<div class="pl-5 opacity-75">{{ viewingGroupDesc }}</div>
+				</div>
+				<LinkList />
+			</div>
 		</div>
 	</div>
 </template>
