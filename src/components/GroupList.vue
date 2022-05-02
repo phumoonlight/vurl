@@ -7,6 +7,7 @@ import { GroupDocument } from '@/services/linkgroup/linkgroup.type'
 import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
 import IconEdit from '@/components/icons/IconEdit.vue'
 import ModalEditGroup from '@/components/modal/ModalEditGroup.vue'
+import { updateOrder } from '@/services/linkgroup/linkgroup.http'
 
 const group = useLinkGroup()
 const modal = useModal()
@@ -22,6 +23,7 @@ const onClickEdit = (item: GroupDocument) => {
 }
 
 const onDragChange = (event: any) => {
+	const FACTOR = 0.0000001
 	const typedEvent: DragChangeEvent = event
 	const targetItem = typedEvent.moved.element
 	const itemId = targetItem.id
@@ -30,12 +32,13 @@ const onDragChange = (event: any) => {
 	const prevItem = group.groups[newIndex + -1]
 	let newOrder = 0
 	if (!prevItem && nextItem) {
-		newOrder = nextItem.order + 0.01
+		newOrder = nextItem.order + FACTOR
 	} else if (prevItem && nextItem) {
 		newOrder = getRandomOrderBetween(prevItem.order, nextItem.order)
 	} else if (prevItem && !nextItem) {
-		newOrder = prevItem.order - 0.01
+		newOrder = prevItem.order - FACTOR
 	}
+	updateOrder(itemId, newOrder)
 }
 </script>
 

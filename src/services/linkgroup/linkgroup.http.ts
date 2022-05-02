@@ -40,3 +40,16 @@ export const deleteGroup = async (id: string) => {
 		return null
 	}
 }
+
+export const updateOrder = async (id: string, order: number) => {
+	try {
+		const url = `api/vurl/groups/${id}`
+		const res = await httpClient.patch(url, {
+			order,
+		})
+		return res.data
+	} catch (error) {
+		return null
+	}
+}
+
