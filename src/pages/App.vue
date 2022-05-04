@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '@/services/firebase'
 import { useLink } from '@/services/link/link.hook'
 import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
-import { cookie } from '@/common/cookie'
 import { useModal } from '@/common/modal'
 import { useUrlQuery } from '@/common/urlquery'
 import { useGlobalLoading } from '@/common/loading'
@@ -25,10 +24,6 @@ const queryGroupId = useUrlQuery('group')
 const link = useLink()
 const linkGroup = useLinkGroup()
 
-const isUserNotSignedIn = computed(() => {
-	return !signedInUser.user.value && !signedInUser.isLoading.value
-})
-
 const viewingGroupName = computed(() => {
 	if (loading.isLoading) return ''
 	if (!queryGroupId.value) return 'Main'
@@ -45,7 +40,6 @@ const viewingGroupDesc = computed(() => {
 
 const onClickSignOut = () => {
 	signedInUser.signOut()
-	router.replace('/')
 }
 
 const onClickAdd = (key: 'link' | 'group') => {
@@ -59,34 +53,27 @@ const onLinkCreated = (gid: string) => {
 	router.push('/app')
 }
 
-watch(route, () => {
-	link.fetchData(queryGroupId.value)
-})
-
-onMounted(async () => {
-	if (isUserNotSignedIn.value || !signedInUser.user.value) {
-		router.replace('/')
-		return
-	}
+signedInUser.onSignIn(async () => {
 	loading.start()
-	const token = await signedInUser.user.value.getIdToken()
-	cookie.setAccessToken(token)
 	await link.fetchData(queryGroupId.value)
 	await linkGroup.fetchData()
 	loading.done()
 })
 
-watch(signedInUser.user, async (changedUser) => {
-	if (changedUser) return
+signedInUser.onSignOut(() => {
 	router.replace('/')
+})
+
+watch(route, () => {
+	link.fetchData(queryGroupId.value)
 })
 </script>
 
 <template>
 	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
 	<ModalAddGroup :modal="modalAddGroup" />
-	<div>
-		<nav v-if="signedInUser.user.value" class="border-b-[1px] border-gray-500">
+	<div v-if="signedInUser.isSignedIn">
+		<nav class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
 				<div class="text-xl tracking-wider uppercase font-serif font-bold">
 					vurl
@@ -100,12 +87,12 @@ watch(signedInUser.user, async (changedUser) => {
 							<div
 								class="bg-gray-500 p-2 rounded-full w-12 h-12 flex justify-center items-center cursor-pointer hover:brightness-75 text-2xl"
 							>
-								{{ signedInUser.user.value.displayName?.[0] }}
+								{{ signedInUser.user.displayName?.[0] }}
 							</div>
 						</template>
 						<div>
 							<div class="p-2 mb-4 opacity-75">
-								{{ signedInUser.user.value.displayName }}
+								{{ signedInUser.user.displayName }}
 							</div>
 							<div
 								class="p-2 hover:bg-gray-600 cursor-pointer rounded-b"
@@ -118,7 +105,7 @@ watch(signedInUser.user, async (changedUser) => {
 				</div>
 			</div>
 		</nav>
-		<div v-if="signedInUser.user.value" class="flex mt-4 gap-4 items-start">
+		<div class="flex mt-4 gap-4 items-start">
 			<GroupList />
 			<div>
 				<div class="mb-4">

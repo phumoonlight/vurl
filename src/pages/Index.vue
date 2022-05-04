@@ -1,32 +1,22 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFirebaseSignedInUser } from '@/services/firebase'
-import { cookie } from '@/common/cookie'
-import { useGlobalLoading } from '@/common/loading'
 import ButtonSignInGoogle from '@/components/button/ButtonSignInGoogle.vue'
 
 const router = useRouter()
-const loading = useGlobalLoading()
 const signedInUser = useFirebaseSignedInUser()
 
-const isUserNotSignedIn = computed(() => {
-	return !signedInUser.user.value && !signedInUser.isLoading.value
-})
-
-watch(signedInUser.user, async (changedUser) => {
-	if (!changedUser) return
-	loading.start()
-	const token = await changedUser.getIdToken()
-	cookie.setAccessToken(token)
+signedInUser.onSignIn(() => {
 	router.replace('/app')
-	loading.done()
 })
 </script>
 
 <template>
+	<div v-if="signedInUser.isLoading" class="flex justify-center mt-10">
+		Authenticate...
+	</div>
 	<div
-		v-if="isUserNotSignedIn"
+		v-if="signedInUser.isSignOut"
 		class="flex justify-center items-center h-[100vh]"
 	>
 		<div class="flex flex-col items-center w-[300px]">

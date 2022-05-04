@@ -7,7 +7,11 @@ import {
 	signInWithPopup,
 	User,
 } from 'firebase/auth'
-import { ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
+import { cookie } from '@/common/cookie'
+
+export type OnSignOut = () => void
+export type OnSignIn = (user: User) => void
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCUfYJ_R_mrhRa2BZczAtH0SCQyG_Y7Gzk',
@@ -43,18 +47,59 @@ const user = ref<User | null>(null)
 const isLoading = ref(true)
 
 export const useFirebaseSignedInUser = () => {
-	onAuthStateChanged(firebaseAuth, (changedUser) => {
-		user.value = changedUser
-		isLoading.value = false
-	})
+	const onSignInCallback = ref<OnSignIn>(() => {})
+	const onSignOutCallback = ref<OnSignOut>(() => {})
+	const isSignedIn = computed(() => !!user.value)
+	const isSignOut = computed(() => !user.value && !isLoading.value)
+
+	const authen = () => {
+		return new Promise<boolean>((resolve) => {
+			const unsub = onAuthStateChanged(
+				firebaseAuth,
+				(changedUser) => {
+					resolve(!!changedUser)
+					unsub()
+				},
+				() => {
+					resolve(false)
+					unsub()
+				}
+			)
+		})
+	}
 
 	const signOut = () => {
 		firebaseAuth.signOut()
 	}
 
-	return {
-		isLoading,
-		user,
-		signOut,
+	const onSignIn = (callback: OnSignIn) => {
+		onSignInCallback.value = callback
 	}
+
+	const onSignOut = (callback: OnSignOut) => {
+		onSignOutCallback.value = callback
+	}
+
+	onAuthStateChanged(firebaseAuth, async (changedUser) => {
+		user.value = changedUser
+		isLoading.value = false
+		if (changedUser) {
+			onSignInCallback.value(changedUser)
+			const token = await changedUser.getIdToken()
+			cookie.setAccessToken(token)
+			return
+		}
+		onSignOutCallback.value()
+	})
+
+	return reactive({
+		isLoading,
+		isSignedIn,
+		isSignOut,
+		user,
+		authen,
+		signOut,
+		onSignIn,
+		onSignOut,
+	})
 }
