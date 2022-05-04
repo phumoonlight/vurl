@@ -50,7 +50,7 @@ const onClickDelete = async () => {
 	group.editingGroup = null
 	props.modal.hide()
 	await group.fetchData()
-	router.replace('/')
+	router.replace('/app')
 }
 
 watch(
