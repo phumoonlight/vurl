@@ -79,12 +79,12 @@ const onChange = (event: any) => {
 				<a :href="item.element.url" target="_blank" rel="noopener noreferrer">
 					<div>
 						<img
-							class="h-[200px] w-[300px] object-cover object-top"
+							class="h-[200px] w-full object-cover object-top"
 							:src="item.element.timg || imageNoImage"
 							alt=""
 						/>
 					</div>
-					<div class="p-2 pl-0 font-bold tracking-wider text-lg truncate">
+					<div class="p-2 pl-0 font-bold tracking-wider text-lg break-all">
 						{{ item.element.title }}
 					</div>
 				</a>

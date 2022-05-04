@@ -107,7 +107,7 @@ watch(route, () => {
 		</nav>
 		<div class="flex mt-4 gap-4 items-start">
 			<GroupList />
-			<div>
+			<div class="pr-4">
 				<div class="mb-4">
 					<div class="text-3xl p-2 font-bold tracking-wider">
 						{{ viewingGroupName }}
