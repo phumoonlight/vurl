@@ -39,10 +39,10 @@ export const signInWithGoogle = async () => {
 	console.log(result)
 }
 
-export const useFirebaseSignedInUser = () => {
-	const isLoading = ref(true)
-	const user = ref<User | null>(null)
+const user = ref<User | null>(null)
+const isLoading = ref(true)
 
+export const useFirebaseSignedInUser = () => {
 	onAuthStateChanged(firebaseAuth, (changedUser) => {
 		user.value = changedUser
 		isLoading.value = false

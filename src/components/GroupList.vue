@@ -46,7 +46,7 @@ const onDragChange = (event: any) => {
 	<ModalEditGroup :modal="modal" />
 	<div class="flex flex-col">
 		<router-link
-			to="/"
+			to="/app"
 			class="group-item min-w-[200px] p-2 mb-4 bg-gray-700"
 			:class="{ 'group-item-active': !queryGroupId }"
 		>
@@ -62,7 +62,7 @@ const onDragChange = (event: any) => {
 			<template #item="item">
 				<div class="item relative">
 					<router-link
-						:to="`/?group=${item.element.id}`"
+						:to="`/app?group=${item.element.id}`"
 						class="group-item flex items-end bg-gray-700 min-w-[200px] p-1 h-[90px] bg-cover text-white mb-2"
 						:class="{ 'group-item-active': item.element.id === queryGroupId }"
 						:style="{
