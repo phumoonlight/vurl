@@ -87,12 +87,12 @@ watch(route, () => {
 							<div
 								class="bg-gray-500 p-2 rounded-full w-12 h-12 flex justify-center items-center cursor-pointer hover:brightness-75 text-2xl"
 							>
-								{{ signedInUser.user.displayName?.[0] }}
+								{{ signedInUser.user?.displayName?.[0] }}
 							</div>
 						</template>
 						<div>
 							<div class="p-2 mb-4 opacity-75">
-								{{ signedInUser.user.displayName }}
+								{{ signedInUser.user?.displayName }}
 							</div>
 							<div
 								class="p-2 hover:bg-gray-600 cursor-pointer rounded-b"
