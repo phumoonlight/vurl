@@ -66,7 +66,7 @@ export const useLinkForm = () => {
 		return !!resCreate
 	}
 
-	const update = async () => {
+	const update = async (groupId: string) => {
 		if (!link.editingLink) return false
 		let thumbnail = imageUrl.value
 		if (imageFile.value) {
@@ -75,6 +75,7 @@ export const useLinkForm = () => {
 			thumbnail = resUpload.uploadedUrl || ''
 		}
 		const resUpdate = await linkHttp.updateLink(link.editingLink.id, {
+			gid: groupId,
 			title: name.value,
 			url: url.value,
 			timg: thumbnail,
