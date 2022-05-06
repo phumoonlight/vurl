@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
-import { NModal, NInput } from 'naive-ui'
+import { watchEffect, computed, ref } from 'vue'
+import { NModal, NInput, NSelect } from 'naive-ui'
 import { ModalController } from '@/common/modal'
 import { useLoading } from '@/common/loading'
 import { useLink, useLinkForm } from '@/services/link/link.hook'
 import imageNoImage from '@/assets/no-image.png'
+import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
 
 interface Props {
 	modal: ModalController
@@ -15,12 +16,27 @@ const props = defineProps<Props>()
 const loading = useLoading()
 const form = useLinkForm()
 const link = useLink()
+const group = useLinkGroup()
+const selectedGroup = ref('')
+
+const groupOptions = computed(() => {
+	return [
+		{
+			value: '',
+			label: 'Main',
+		},
+		...group.groups.map((group) => ({
+			value: group.id,
+			label: group.title,
+		})),
+	]
+})
 
 const onSubmit = async () => {
 	if (loading.isLoading) return
 	if (!link.editingLink) return
 	loading.start()
-	const isSuccess = await form.update()
+	const isSuccess = await form.update(selectedGroup.value)
 	loading.done()
 	if (!isSuccess) return
 	props.modal.hide()
@@ -41,6 +57,7 @@ const onClickDelete = async () => {
 watchEffect(() => {
 	if (!link.editingLink) return
 	if (!props.modal.isVisible) return
+	selectedGroup.value = link.editingLink.gid
 	form.name = link.editingLink.title
 	form.url = link.editingLink.url
 	form.imageUrl = link.editingLink.timg
@@ -66,6 +83,15 @@ watchEffect(() => {
 					</div>
 				</div>
 				<div class="grid grid-cols-5 gap-4 items-center">
+					<label class="col-span-1" for="input-url">Group</label>
+					<div class="col-span-4">
+						<NSelect
+							class="col-span-4"
+							v-model:value="selectedGroup"
+							:options="groupOptions"
+							filterable
+						/>
+					</div>
 					<label class="col-span-1" for="input-name">Name</label>
 					<NInput
 						class="col-span-4"
