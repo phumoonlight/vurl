@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watchEffect, computed, ref } from 'vue'
-import { NModal, NInput, NSelect } from 'naive-ui'
+import { NModal, NInput, NSelect, useMessage } from 'naive-ui'
 import { ModalController } from '@/common/modal'
 import { useLoading } from '@/common/loading'
 import { useLink, useLinkForm } from '@/services/link/link.hook'
@@ -13,6 +13,7 @@ interface Props {
 
 const emit = defineEmits(['submit'])
 const props = defineProps<Props>()
+const message = useMessage()
 const loading = useLoading()
 const form = useLinkForm()
 const link = useLink()
@@ -39,6 +40,7 @@ const onSubmit = async () => {
 	const isSuccess = await form.update(selectedGroup.value)
 	loading.done()
 	if (!isSuccess) return
+	message.success('Link updated')
 	props.modal.hide()
 	emit('submit')
 }
