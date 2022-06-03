@@ -58,7 +58,6 @@ const onChange = (event: any) => {
 <template>
 	<ModalEditLink
 		:modal="modal"
-		:dataSource="link.editingLink"
 		@submit="onSubmitEdit"
 	/>
 	<div
@@ -69,7 +68,6 @@ const onChange = (event: any) => {
 	</div>
 	<Draggable
 		class="grid grid-cols-4 gap-4 items-start"
-		group="links"
 		item-key="id"
 		:list="link.links"
 		@change="onChange"

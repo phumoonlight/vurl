@@ -97,14 +97,12 @@ watchEffect(() => {
 					<label class="col-span-1" for="input-name">Name</label>
 					<NInput
 						class="col-span-4"
-						id="input-name"
 						placeholder=""
 						v-model:value="form.name"
 					/>
 					<label class="col-span-1" for="input-url">URL</label>
 					<NInput
 						class="col-span-4"
-						id="input-url"
 						placeholder=""
 						v-model:value="form.url"
 					/>
