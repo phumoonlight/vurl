@@ -13,6 +13,8 @@ import ModalAddLink from '@/components/modal/ModalAddLink.vue'
 import ModalAddGroup from '@/components/modal/ModalAddGroup.vue'
 import LinkList from '@/components/LinkList.vue'
 import GroupList from '@/components/GroupList.vue'
+// import IconEdit from '@/components/icons/IconEdit.vue'
+import { GroupDocument } from '@/services/linkgroup/linkgroup.type'
 
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +39,11 @@ const viewingGroupDesc = computed(() => {
 	if (!linkGroup.viewingGroup) return ''
 	return linkGroup.viewingGroup.desc
 })
+
+const onClickEdit = (item: GroupDocument | undefined) => {
+	if (!item) return
+	linkGroup.editingGroup = item
+}
 
 const onClickSignOut = () => {
 	signedInUser.signOut()
@@ -72,14 +79,14 @@ watch(route, () => {
 <template>
 	<ModalAddLink :modal="modalAddLink" @created="onLinkCreated" />
 	<ModalAddGroup :modal="modalAddGroup" />
+	<div class="bottom-4 right-4 fixed z-50">
+		<ButtonAddBookmark @select="onClickAdd" />
+	</div>
 	<div v-if="signedInUser.isSignedIn">
 		<nav class="border-b-[1px] border-gray-500">
 			<div class="flex justify-between items-center p-2">
 				<div class="text-xl tracking-wider uppercase font-serif font-bold">
 					vurl
-				</div>
-				<div>
-					<ButtonAddBookmark @select="onClickAdd" />
 				</div>
 				<div class="flex items-center gap-8">
 					<NPopover class="p-0" trigger="click">
@@ -105,14 +112,31 @@ watch(route, () => {
 				</div>
 			</div>
 		</nav>
+
 		<div class="flex mt-4 gap-4 items-start">
 			<GroupList />
 			<div class="pr-4">
-				<div class="mb-4">
-					<div class="text-3xl p-2 font-bold tracking-wider">
-						{{ viewingGroupName }}
+				<div
+					v-if="linkGroup.viewingGroup?.timg"
+					class="h-[200px] overflow-hidden"
+				>
+					<img class="w-full" :src="linkGroup.viewingGroup?.timg" alt="" />
+				</div>
+				<div class="mb-4 pl-10 flex">
+					<div>
+						<div class="text-3xl p-2 font-bold tracking-wider">
+							{{ viewingGroupName }}
+						</div>
+						<div class="pl-5 opacity-75">{{ viewingGroupDesc }}</div>
 					</div>
-					<div class="pl-5 opacity-75">{{ viewingGroupDesc }}</div>
+					<div>
+						<!-- <div
+							class="btn-edit p-2 bg-white rounded-full"
+							@click="onClickEdit(linkGroup.viewingGroup)"
+						>
+							<IconEdit class="text-black w-[20px] h-[20px]" />
+						</div> -->
+					</div>
 				</div>
 				<LinkList />
 			</div>
