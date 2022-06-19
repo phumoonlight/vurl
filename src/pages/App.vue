@@ -28,7 +28,7 @@ const linkGroup = useLinkGroup()
 
 const viewingGroupName = computed(() => {
 	if (loading.isLoading) return ''
-	if (!queryGroupId.value) return 'Main'
+	if (!queryGroupId.value) return ''
 	if (!linkGroup.viewingGroup) return 'Unknown Group'
 	return linkGroup.viewingGroup.title
 })

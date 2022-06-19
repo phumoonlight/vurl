@@ -45,13 +45,17 @@ const onDragChange = (event: any) => {
 <template>
 	<ModalEditGroup :modal="modal" />
 	<div class="flex flex-col">
-		<router-link
+		<!-- <router-link
 			to="/app"
 			class="group-item min-w-[200px] p-2 mb-4 bg-gray-700"
 			:class="{ 'group-item-active': !queryGroupId }"
 		>
 			<strong class="font-serif tracking-wide">Main</strong>
-		</router-link>
+		</router-link> -->
+		<div v-if="!group.groups.length" class="p-2 flex flex-col">
+			<div class="mb-4">You don't have any board</div>
+			<button class="rounded-lg bg-green-700 p-2">Create board</button>
+		</div>
 		<Draggable
 			class="list max-h-[70vh] overflow-y-scroll pr-2"
 			group="link-groups"
