@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NPopover } from 'naive-ui'
 import { useFirebaseSignedInUser } from '@/services/firebase'
 import { useLink } from '@/services/link/link.hook'
 import { useLinkGroup } from '@/services/linkgroup/linkgroup.hook'
@@ -11,6 +10,7 @@ import { useGlobalLoading } from '@/common/loading'
 import ButtonAddBookmark from '@/components/button/ButtonAddBookmark.vue'
 import ModalAddLink from '@/components/modal/ModalAddLink.vue'
 import ModalAddGroup from '@/components/modal/ModalAddGroup.vue'
+import Navbar from '@/components/Navbar.vue'
 import LinkList from '@/components/LinkList.vue'
 import GroupList from '@/components/GroupList.vue'
 // import IconEdit from '@/components/icons/IconEdit.vue'
@@ -83,36 +83,10 @@ watch(route, () => {
 		<ButtonAddBookmark @select="onClickAdd" />
 	</div>
 	<div v-if="signedInUser.isSignedIn">
-		<nav class="border-b-[1px] border-gray-500">
-			<div class="flex justify-between items-center p-2">
-				<div class="text-xl tracking-wider uppercase font-serif font-bold">
-					vurl
-				</div>
-				<div class="flex items-center gap-8">
-					<NPopover class="p-0" trigger="click">
-						<template #trigger>
-							<div
-								class="bg-gray-500 p-2 rounded-full w-12 h-12 flex justify-center items-center cursor-pointer hover:brightness-75 text-2xl"
-							>
-								{{ signedInUser.user?.displayName?.[0] }}
-							</div>
-						</template>
-						<div>
-							<div class="p-2 mb-4 opacity-75">
-								{{ signedInUser.user?.displayName }}
-							</div>
-							<div
-								class="p-2 hover:bg-gray-600 cursor-pointer rounded-b"
-								@click="onClickSignOut"
-							>
-								Sign out
-							</div>
-						</div>
-					</NPopover>
-				</div>
-			</div>
-		</nav>
-
+		<Navbar
+			:displayName="signedInUser.user?.displayName || ''"
+			@signOut="signedInUser.signOut"
+		/>
 		<div class="flex mt-4 gap-4 items-start">
 			<GroupList />
 			<div class="pr-4">

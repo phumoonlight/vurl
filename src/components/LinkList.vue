@@ -56,10 +56,7 @@ const onChange = (event: any) => {
 </script>
 
 <template>
-	<ModalEditLink
-		:modal="modal"
-		@submit="onSubmitEdit"
-	/>
+	<ModalEditLink :modal="modal" @submit="onSubmitEdit" />
 	<div
 		v-if="!link.links.length && !globalLoading.isLoading"
 		class="flex justify-center h-full items-center"
@@ -82,7 +79,9 @@ const onChange = (event: any) => {
 							alt=""
 						/>
 					</div>
-					<div class="p-2 pl-0 font-bold tracking-wider text-lg break-all">
+					<div
+						class="p-2 pl-0 font-bold tracking-wider text-lg break-all truncate"
+					>
 						{{ item.element.title }}
 					</div>
 				</a>
