@@ -23,7 +23,7 @@ signedInUser.onSignIn(() => {
 			<div class="text-6xl font-serif font-bold mb-4 tracking-widest uppercase">
 				vurl
 			</div>
-			<div class="opacity-70 font-serif mb-10">Visualize your saved link.</div>
+			<div class="opacity-70 font-serif mb-10">Visualize bookmark with thumbnail.</div>
 			<ButtonSignInGoogle class="mb-10" />
 			<a
 				class="font-bold hover:underline"
