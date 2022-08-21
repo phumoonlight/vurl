@@ -25,11 +25,11 @@ const groupOptions = computed(() => {
 	return [
 		{
 			value: '',
-			label: 'Main',
+			label: 'No group',
 		},
 		...group.groups.map((group) => ({
 			value: group.id,
-			label: group.title,
+			label: group.name,
 		})),
 	]
 })

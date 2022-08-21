@@ -1,10 +1,10 @@
 export interface GroupDocument {
 	id: string
 	uid: string
-	title: string
+	name: string
 	desc: string
 	timg: string
-	order: number
+	posn: number
 }
 
 export interface FormGroup {

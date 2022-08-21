@@ -4,8 +4,8 @@ import { LinkDocument } from './link.type'
 export const getLinks = async (groupId: string): Promise<LinkDocument[]> => {
 	try {
 		const url = `api/vurl/links/?group=${groupId}`
-		const res = await httpClient.get<{ data: LinkDocument[] }>(url)
-		return res.data.data || []
+		const res = await httpClient.get<{ value: LinkDocument[] }>(url)
+		return res.data.value || []
 	} catch (error) {
 		return []
 	}
@@ -35,17 +35,17 @@ export const deleteLink = async (id: string) => {
 	try {
 		const url = `api/vurl/links/${id}`
 		const res = await httpClient.delete(url)
-		return res.data
+		return true
 	} catch (error) {
-		return null
+		return false
 	}
 }
 
-export const updateOrder = async (id: string, order: number) => {
+export const updateOrder = async (id: string, posn: number) => {
 	try {
 		const url = `api/vurl/links/${id}`
 		const res = await httpClient.patch(url, {
-			order,
+			posn,
 		})
 		return res.data
 	} catch (error) {

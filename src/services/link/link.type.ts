@@ -3,7 +3,7 @@ export interface LinkDocument {
 	gid: string
 	uid: string
 	timg: string
-	title: string
+	name: string
 	url: string
-	order: number
+	posn: number
 }

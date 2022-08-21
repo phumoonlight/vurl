@@ -11,7 +11,7 @@ const links = ref<LinkDocument[]>([])
 
 export const useLink = () => {
 	const sortByOrder = () => {
-		links.value.sort((a, b) => b.order - a.order)
+		links.value.sort((a, b) => b.posn - a.posn)
 	}
 	const fetchData = async (groupId: string) => {
 		links.value = await linkHttp.getLinks(groupId)
@@ -54,14 +54,14 @@ export const useLinkForm = () => {
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return false
-			thumbnail = resUpload.uploadedUrl || ''
+			thumbnail = resUpload.value || ''
 		}
 		const resCreate = await linkHttp.createLink({
 			gid: groupId,
-			title: name.value,
+			name: name.value,
 			url: url.value,
 			timg: thumbnail,
-			order: link.links.length,
+			posn: link.links.length,
 		})
 		return !!resCreate
 	}
@@ -72,11 +72,11 @@ export const useLinkForm = () => {
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return false
-			thumbnail = resUpload.uploadedUrl || ''
+			thumbnail = resUpload.value || ''
 		}
 		const resUpdate = await linkHttp.updateLink(link.editingLink.id, {
 			gid: groupId,
-			title: name.value,
+			name: name.value,
 			url: url.value,
 			timg: thumbnail,
 		})
@@ -85,9 +85,9 @@ export const useLinkForm = () => {
 
 	const remove = async () => {
 		if (!link.editingLink) return false
-		const res = await linkHttp.deleteLink(link.editingLink.id)
+		const isSuccess = await linkHttp.deleteLink(link.editingLink.id)
 		await wait(500)
-		return !!res
+		return isSuccess
 	}
 
 	const handleFileChange = (event: Event) => {

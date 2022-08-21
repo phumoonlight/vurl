@@ -28,7 +28,7 @@ const groupOptions = computed(() => {
 		},
 		...group.groups.map((group) => ({
 			value: group.id,
-			label: group.title,
+			label: group.name,
 		})),
 	]
 })
@@ -60,7 +60,7 @@ watchEffect(() => {
 	if (!link.editingLink) return
 	if (!props.modal.isVisible) return
 	selectedGroup.value = link.editingLink.gid
-	form.name = link.editingLink.title
+	form.name = link.editingLink.name
 	form.url = link.editingLink.url
 	form.imageUrl = link.editingLink.timg
 	form.imageFile = null

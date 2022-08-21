@@ -32,11 +32,11 @@ const onDragChange = (event: any) => {
 	const prevItem = group.groups[newIndex + -1]
 	let newOrder = 0
 	if (!prevItem && nextItem) {
-		newOrder = nextItem.order + FACTOR
+		newOrder = nextItem.posn + FACTOR
 	} else if (prevItem && nextItem) {
-		newOrder = getRandomOrderBetween(prevItem.order, nextItem.order)
+		newOrder = getRandomOrderBetween(prevItem.posn, nextItem.posn)
 	} else if (prevItem && !nextItem) {
-		newOrder = prevItem.order - FACTOR
+		newOrder = prevItem.posn - FACTOR
 	}
 	updateOrder(itemId, newOrder)
 }
@@ -74,7 +74,7 @@ const onDragChange = (event: any) => {
 						}"
 					>
 						<div class="group-item-name drop-shadow-lg text-lg p-1 px-2">
-							{{ item.element.title }}
+							{{ item.element.name }}
 						</div>
 					</router-link>
 					<div

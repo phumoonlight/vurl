@@ -45,11 +45,11 @@ const onChange = (event: any) => {
 	const frontItem = link.links[newIndex - 1]
 	let newOrder = 0
 	if (!frontItem && behindItem) {
-		newOrder = behindItem.order + FACTOR
+		newOrder = behindItem.posn + FACTOR
 	} else if (frontItem && behindItem) {
-		newOrder = getNewOrderBetween(behindItem.order, frontItem.order)
+		newOrder = getNewOrderBetween(behindItem.posn, frontItem.posn)
 	} else if (frontItem && !behindItem) {
-		newOrder = frontItem.order - FACTOR
+		newOrder = frontItem.posn - FACTOR
 	}
 	updateOrder(itemId, newOrder)
 }
@@ -82,7 +82,7 @@ const onChange = (event: any) => {
 					<div
 						class="p-2 pl-0 font-bold tracking-wider text-lg break-all truncate"
 					>
-						{{ item.element.title }}
+						{{ item.element.name }}
 					</div>
 				</a>
 				<div

@@ -31,7 +31,7 @@ const onSubmit = async () => {
 	if (!result) return
 	group.localUpdate({
 		...group.editingGroup,
-		title: result.title || '',
+		name: result.name || '',
 		desc: result.desc || '',
 		timg: result.timg || '',
 	})
@@ -58,7 +58,7 @@ watch(
 	(value) => {
 		if (!value) return
 		if (!group.editingGroup) return
-		form.name = group.editingGroup.title
+		form.name = group.editingGroup.name
 		form.description = group.editingGroup.desc
 		form.imageUrl = group.editingGroup.timg
 		form.imageFile = null
@@ -132,7 +132,7 @@ watch(
 						</template>
 						<div v-if="group.editingGroup" class="flex gap-1">
 							<span>All links in</span>
-							<span class="font-bold">{{ group.editingGroup.title }}</span>
+							<span class="font-bold">{{ group.editingGroup.name }}</span>
 							<span>will be move to <span class="font-bold">Main</span></span>
 						</div>
 					</NPopconfirm>

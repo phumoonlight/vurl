@@ -5,6 +5,7 @@ import {
 	GoogleAuthProvider,
 	onAuthStateChanged,
 	signInWithPopup,
+	signInAnonymously,
 	User,
 } from 'firebase/auth'
 import { computed, reactive, ref } from 'vue'
@@ -40,6 +41,11 @@ export const getAuthUser = () => {
 export const signInWithGoogle = async () => {
 	const googleAuthProvider = new GoogleAuthProvider()
 	const result = await signInWithPopup(firebaseAuth, googleAuthProvider)
+	console.log(result)
+}
+
+export const signInAsGuest = async () => {
+	const result = await signInAnonymously(firebaseAuth)
 	console.log(result)
 }
 

@@ -3,9 +3,10 @@ import { GroupDocument } from './linkgroup.type'
 
 export const getGroups = async (): Promise<GroupDocument[]> => {
 	try {
-		const url = `api/vurl/groups/`
-		const res = await httpClient.get<{ data: GroupDocument[] }>(url)
-		return res.data.data || []
+		const url = `api/vurl/linkgroups/`
+		const res = await httpClient.get<{ value: GroupDocument[] }>(url)
+		console.log(res.data.value)
+		return res.data.value || []
 	} catch (error) {
 		return []
 	}
@@ -13,7 +14,7 @@ export const getGroups = async (): Promise<GroupDocument[]> => {
 
 export const createGroup = async (payload: any) => {
 	try {
-		const url = `api/vurl/groups/`
+		const url = `api/vurl/linkgroups/`
 		const res = await httpClient.post(url, payload)
 		return res.data
 	} catch (error) {
@@ -23,7 +24,7 @@ export const createGroup = async (payload: any) => {
 
 export const updateGroup = async (id: string, payload: any) => {
 	try {
-		const url = `api/vurl/groups/${id}`
+		const url = `api/vurl/linkgroups/${id}`
 		const res = await httpClient.patch(url, payload)
 		return res.data
 	} catch (error) {
@@ -33,23 +34,22 @@ export const updateGroup = async (id: string, payload: any) => {
 
 export const deleteGroup = async (id: string) => {
 	try {
-		const url = `api/vurl/groups/${id}`
-		const res = await httpClient.delete(url)
-		return res.data
+		const url = `api/vurl/linkgroups/${id}`
+		await httpClient.delete(url)
+		return true
 	} catch (error) {
-		return null
+		return false
 	}
 }
 
-export const updateOrder = async (id: string, order: number) => {
+export const updateOrder = async (id: string, posn: number) => {
 	try {
-		const url = `api/vurl/groups/${id}`
+		const url = `api/vurl/linkgroups/${id}`
 		const res = await httpClient.patch(url, {
-			order,
+			posn,
 		})
 		return res.data
 	} catch (error) {
 		return null
 	}
 }
-

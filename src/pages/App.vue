@@ -30,7 +30,7 @@ const viewingGroupName = computed(() => {
 	if (loading.isLoading) return ''
 	if (!queryGroupId.value) return ''
 	if (!linkGroup.viewingGroup) return 'Unknown Group'
-	return linkGroup.viewingGroup.title
+	return linkGroup.viewingGroup.name
 })
 
 const viewingGroupDesc = computed(() => {

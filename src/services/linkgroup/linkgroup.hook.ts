@@ -18,11 +18,12 @@ export const useLinkGroup = () => {
 	})
 
 	const sort = () => {
-		groups.value.sort((a, b) => b.order - a.order)
+		groups.value.sort((a, b) => b.posn - a.posn)
 	}
 
 	const fetchData = async () => {
 		groups.value = await linkGroupHttp.getGroups()
+		console.log(groups.value)
 		sort()
 	}
 
@@ -78,13 +79,13 @@ export const useLinkGroupForm = (): FormGroup => {
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return false
-			thumbnail = resUpload.uploadedUrl || ''
+			thumbnail = resUpload.value || ''
 		}
 		const resCreate = await linkGroupHttp.createGroup({
-			title: name.value,
+			name: name.value,
 			desc: description.value,
 			timg: thumbnail,
-			order: group.groups.length,
+			posn: group.groups.length,
 		})
 		return !!resCreate
 	}
@@ -95,16 +96,16 @@ export const useLinkGroupForm = (): FormGroup => {
 		if (imageFile.value) {
 			const resUpload = await uploadImage(imageFile.value)
 			if (!resUpload) return null
-			thumbnail = resUpload.uploadedUrl || ''
+			thumbnail = resUpload.value || ''
 		}
 		const resUpdate = await linkGroupHttp.updateGroup(group.editingGroup.id, {
-			title: name.value,
+			name: name.value,
 			desc: description.value,
 			timg: thumbnail,
 		})
 		if (!resUpdate) return null
 		const updated: Partial<GroupDocument> = {
-			title: name.value,
+			name: name.value,
 			desc: description.value,
 			timg: thumbnail,
 		}
@@ -113,9 +114,9 @@ export const useLinkGroupForm = (): FormGroup => {
 
 	const remove = async () => {
 		if (!group.editingGroup) return false
-		const res = await linkGroupHttp.deleteGroup(group.editingGroup.id)
+		const isSuccess = await linkGroupHttp.deleteGroup(group.editingGroup.id)
 		await wait(500)
-		return !!res
+		return isSuccess
 	}
 
 	const handleFileChange = (event: Event) => {
